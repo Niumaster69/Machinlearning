@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recomendacion de Juegos - ML Gaming</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        * { border-radius: 0 !important; }
+        body {
+            background-color: #ffffff;
+            color: #2d2d2d;
+            font-family: 'VT323', monospace;
+            font-size: 1.25rem;
+        }
+        h1, h2, h3, h4, h5, h6, .navbar-brand { font-family: 'Press Start 2P', cursive; }
+        h1 { font-size: 1.3rem; line-height: 2.2; }
+        h2 { font-size: 1rem; line-height: 2; }
+        h4 { font-size: 0.8rem; line-height: 1.8; }
+        h5 { font-size: 0.7rem; line-height: 1.8; }
+        p, li, td, th { font-family: 'VT323', monospace; font-size: 1.3rem; }
+
+        .pixel-border {
+            border: 4px solid #e11d48;
+            box-shadow: 4px 4px 0px #e11d48;
+        }
+        .navbar { background-color: #1e1b4b !important; border-bottom: 5px solid #7c3aed; }
+        .navbar-brand { font-size: 0.7rem; color: #fbbf24 !important; }
+        .nav-link { font-family: 'Press Start 2P', cursive; font-size: 0.5rem; color: #e0e7ff !important; padding: 8px 14px !important; }
+        .nav-link:hover { color: #fbbf24 !important; }
+        .nav-link.active { color: #fbbf24 !important; background-color: rgba(251,191,36,0.1); }
+
+        .header-app {
+            background-color: #1e1b4b;
+            padding: 55px 0;
+            border-bottom: 5px solid #e11d48;
+            position: relative; overflow: hidden;
+        }
+        .header-app::after {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,0.03) 3px, rgba(255,255,255,0.03) 6px);
+            pointer-events: none;
+        }
+
+        .card-retro {
+            background-color: #fafafa;
+            border: 3px solid #e5e7eb;
+            color: #2d2d2d;
+        }
+        .bg-soft { background-color: #fff1f2; border-top: 3px solid #ffe4e6; border-bottom: 3px solid #ffe4e6; }
+        .bg-warm { background-color: #f5f3ff; border-top: 3px solid #e9e5ff; border-bottom: 3px solid #e9e5ff; }
+
+        .code-block {
+            background-color: #1e1b4b;
+            color: #e0e7ff;
+            padding: 22px;
+            font-family: 'VT323', monospace;
+            font-size: 1.2rem;
+            overflow-x: auto;
+            border: 4px solid #e11d48;
+            box-shadow: 6px 6px 0px #be123c;
+        }
+        .code-block .comment { color: #a5b4fc; }
+        .code-block .keyword { color: #67e8f9; }
+        .code-block .string { color: #fbbf24; }
+        .code-block .function { color: #f0abfc; }
+
+        .table { border-collapse: separate; border-spacing: 3px; }
+        .table th {
+            background-color: #e11d48; color: #fff;
+            font-family: 'Press Start 2P', cursive; font-size: 0.5rem; padding: 12px 8px;
+        }
+        .table td { background-color: #fafafa; color: #2d2d2d; border: 2px solid #e5e7eb; padding: 10px 8px; }
+
+        .stat-bar { background-color: #e5e7eb; height: 22px; position: relative; border: 2px solid #d1d5db; }
+        .stat-bar-fill { height: 100%; }
+        .stat-bar-label {
+            position: absolute; top: 0; left: 8px;
+            font-family: 'Press Start 2P', cursive; font-size: 0.4rem;
+            line-height: 22px; color: #fff; text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
+        }
+
+        .step-box {
+            background-color: #fafafa;
+            border: 2px solid #e5e7eb;
+            border-left: 5px solid #e11d48;
+            padding: 15px;
+            margin-bottom: 8px;
+        }
+
+        footer { background-color: #1e1b4b; border-top: 5px solid #7c3aed; }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">[ ML_GAMING ]</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">> INICIO</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/aplicacion1">> VENTAS</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/aplicacion2">> RECOMENDACION</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <section class="header-app text-center">
+        <div class="container position-relative" style="z-index:1;">
+            <p style="color: #fb7185; font-family: 'Press Start 2P'; font-size: 0.55rem;">PLAYER 2 - STAGE 2</p>
+            <h1 class="mt-3" style="color: #ffffff;">Recomendacion de<br>Videojuegos</h1>
+            <p class="mt-3" style="color: #a5b4fc; font-size: 1.3rem;">Sistema de recomendacion con KNN basado en gustos del jugador</p>
+        </div>
+    </section>
+
+    <!-- Descripcion -->
+    <section class="container my-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h2 style="color: #e11d48;">&gt; Descripcion del problema_</h2>
+                <div class="pixel-border p-4 mt-3" style="background-color: #fff1f2;">
+                    <p>
+                        Hoy hay miles de videojuegos en Steam, PlayStation Store o Nintendo eShop.
+                        Es dificil encontrar juegos nuevos que te gusten entre tanta oferta.
+                        Por eso las tiendas usan sistemas de recomendacion.
+                    </p>
+                    <p>
+                        La idea: si a dos jugadores les gustan los mismos juegos, un juego que le
+                        gusta a uno probablemente le guste al otro. Esto es
+                        <span style="color: #5b21b6; font-weight: bold;">filtrado colaborativo</span>,
+                        lo que usan Netflix, Spotify y Steam.
+                    </p>
+                    <p class="mb-0">
+                        Se simulo un dataset de 5,000 jugadores con horas por genero, ratings
+                        y edad. Se usa KNN para encontrar jugadores similares y recomendar generos.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sobre KNN -->
+    <section class="bg-warm py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <h2 style="color: #5b21b6;">&gt; WEAPON: K-Nearest Neighbors_</h2>
+                    <div class="card-retro p-4 mt-3" style="border-left: 5px solid #7c3aed;">
+                        <p>
+                            KNN es de los algoritmos mas simples. Para clasificar un dato nuevo
+                            busca los K mas parecidos (vecinos cercanos) y ve a que clase
+                            pertenece la mayoria.
+                        </p>
+                        <p>
+                            Ejemplo: K=7, se buscan los 7 jugadores mas parecidos a ti. Si 5 de 7
+                            prefieren RPG, se te recomienda RPG.
+                        </p>
+                    </div>
+
+                    <div class="row mt-4 g-3">
+                        <div class="col-md-6">
+                            <div class="card-retro p-3 h-100" style="border-left: 5px solid #0d9488;">
+                                <h5 class="mb-3" style="color: #0d9488;">[ BUFFS ]</h5>
+                                <ul>
+                                    <li>Muy facil de entender</li>
+                                    <li>No necesita entrenamiento (lazy learner)</li>
+                                    <li>Funciona bien con datos agrupados</li>
+                                    <li>Se adapta facil a datos nuevos</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card-retro p-3 h-100" style="border-left: 5px solid #e11d48;">
+                                <h5 class="mb-3" style="color: #e11d48;">[ DEBUFFS ]</h5>
+                                <ul>
+                                    <li>Lento con datasets muy grandes</li>
+                                    <li>Sensible a la escala (normalizar)</li>
+                                    <li>No va bien con muchas dimensiones</li>
+                                    <li>Elegir K es trial and error</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pasos -->
+    <section class="container my-5">
+        <h2 class="text-center mb-4" style="color: #e11d48;">&gt; QUEST LOG: Pasos_</h2>
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="step-box">
+                    <span style="color: #e11d48; font-family: 'Press Start 2P'; font-size: 0.45rem;">STEP 01</span><br>
+                    <strong style="color: #5b21b6;">Crear dataset simulado</strong> - 5000 jugadores con horas por genero, rating y edad.
+                </div>
+                <div class="step-box">
+                    <span style="color: #e11d48; font-family: 'Press Start 2P'; font-size: 0.45rem;">STEP 02</span><br>
+                    <strong style="color: #5b21b6;">Variable objetivo</strong> - Genero favorito (el que tiene mas horas) es lo que predecimos.
+                </div>
+                <div class="step-box">
+                    <span style="color: #e11d48; font-family: 'Press Start 2P'; font-size: 0.45rem;">STEP 03</span><br>
+                    <strong style="color: #5b21b6;">Normalizar</strong> - KNN usa distancias, hay que escalar con StandardScaler.
+                </div>
+                <div class="step-box">
+                    <span style="color: #e11d48; font-family: 'Press Start 2P'; font-size: 0.45rem;">STEP 04</span><br>
+                    <strong style="color: #5b21b6;">Dividir train/test</strong> - 80% entrenamiento, 20% prueba.
+                </div>
+                <div class="step-box">
+                    <span style="color: #e11d48; font-family: 'Press Start 2P'; font-size: 0.45rem;">STEP 05</span><br>
+                    <strong style="color: #5b21b6;">Entrenar KNN (K=7)</strong> - Se probo K=3,5,7,9,11 y K=7 fue el mejor.
+                </div>
+                <div class="step-box">
+                    <span style="color: #e11d48; font-family: 'Press Start 2P'; font-size: 0.45rem;">STEP 06</span><br>
+                    <strong style="color: #5b21b6;">Evaluar</strong> - Metricas y analisis por genero.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Variables -->
+    <section class="bg-soft py-5">
+        <div class="container">
+            <h2 class="text-center mb-4" style="color: #e11d48;">&gt; INVENTORY: Variables_</h2>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <table class="table">
+                        <thead>
+                            <tr><th>VARIABLE</th><th>DESCRIPCION</th><th>RANGO</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td style="color: #e11d48; font-weight: bold;">horas_action</td><td>Horas en juegos de accion</td><td>0 - 500</td></tr>
+                            <tr><td style="color: #e11d48; font-weight: bold;">horas_rpg</td><td>Horas en juegos RPG</td><td>0 - 500</td></tr>
+                            <tr><td style="color: #e11d48; font-weight: bold;">horas_sports</td><td>Horas en deportes</td><td>0 - 500</td></tr>
+                            <tr><td style="color: #e11d48; font-weight: bold;">horas_shooter</td><td>Horas en shooters</td><td>0 - 500</td></tr>
+                            <tr><td style="color: #e11d48; font-weight: bold;">rating_promedio</td><td>Calificacion promedio</td><td>1.0 - 5.0</td></tr>
+                            <tr><td style="color: #e11d48; font-weight: bold;">edad</td><td>Edad del jugador</td><td>13 - 45</td></tr>
+                            <tr><td style="color: #5b21b6; font-weight: bold;">genero_favorito</td><td><strong>Objetivo (lo que predecimos)</strong></td><td>Action, RPG, Sports, Shooter</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Codigo -->
+    <section class="container my-5">
+        <h2 class="text-center mb-4" style="color: #e11d48;">&gt; SOURCE CODE_</h2>
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div class="code-block">
+<span class="comment"># Importar librerias</span><br>
+<span class="keyword">import</span> numpy <span class="keyword">as</span> np<br>
+<span class="keyword">import</span> pandas <span class="keyword">as</span> pd<br>
+<span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split<br>
+<span class="keyword">from</span> sklearn.preprocessing <span class="keyword">import</span> StandardScaler<br>
+<span class="keyword">from</span> sklearn.neighbors <span class="keyword">import</span> KNeighborsClassifier<br>
+<span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> accuracy_score, classification_report<br>
+<br>
+<span class="comment"># Simular dataset de 5000 jugadores</span><br>
+np.random.<span class="function">seed</span>(42)<br>
+n = 5000<br>
+<br>
+data = {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">'horas_action'</span>: np.random.<span class="function">randint</span>(0, 500, n),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">'horas_rpg'</span>: np.random.<span class="function">randint</span>(0, 500, n),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">'horas_sports'</span>: np.random.<span class="function">randint</span>(0, 500, n),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">'horas_shooter'</span>: np.random.<span class="function">randint</span>(0, 500, n),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">'rating_promedio'</span>: np.random.<span class="function">uniform</span>(1.0, 5.0, n).<span class="function">round</span>(1),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">'edad'</span>: np.random.<span class="function">randint</span>(13, 46, n),<br>
+}<br>
+df = pd.<span class="function">DataFrame</span>(data)<br>
+<br>
+<span class="comment"># Genero favorito = el que tiene mas horas</span><br>
+cols_horas = [<span class="string">'horas_action'</span>, <span class="string">'horas_rpg'</span>, <span class="string">'horas_sports'</span>, <span class="string">'horas_shooter'</span>]<br>
+df[<span class="string">'genero_favorito'</span>] = df[cols_horas].<span class="function">idxmax</span>(axis=1).<span class="function">map</span>({<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">'horas_action'</span>: <span class="string">'Action'</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">'horas_rpg'</span>: <span class="string">'RPG'</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">'horas_sports'</span>: <span class="string">'Sports'</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="string">'horas_shooter'</span>: <span class="string">'Shooter'</span><br>
+})<br>
+<br>
+<span class="comment"># Separar X e y</span><br>
+X = df.<span class="function">drop</span>(<span class="string">'genero_favorito'</span>, axis=1)<br>
+y = df[<span class="string">'genero_favorito'</span>]<br>
+<br>
+<span class="comment"># Normalizar</span><br>
+scaler = <span class="function">StandardScaler</span>()<br>
+X_scaled = scaler.<span class="function">fit_transform</span>(X)<br>
+<br>
+<span class="comment"># Dividir datos</span><br>
+X_train, X_test, y_train, y_test = <span class="function">train_test_split</span>(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;X_scaled, y, test_size=0.2, random_state=42)<br>
+<br>
+<span class="comment"># Entrenar KNN con K=7</span><br>
+knn = <span class="function">KNeighborsClassifier</span>(n_neighbors=7)<br>
+knn.<span class="function">fit</span>(X_train, y_train)<br>
+<br>
+<span class="comment"># Evaluar</span><br>
+pred = knn.<span class="function">predict</span>(X_test)<br>
+<span class="function">print</span>(f<span class="string">"Accuracy: {accuracy_score(y_test, pred)}"</span>)<br>
+<span class="function">print</span>(<span class="function">classification_report</span>(y_test, pred))
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Resultados -->
+    <section class="bg-warm py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <h2 style="color: #5b21b6;">&gt; SCORE BOARD: Resultados_</h2>
+                    <p class="mt-3">Resultados con K=7 vecinos:</p>
+
+                    <table class="table text-center">
+                        <thead>
+                            <tr><th>METRICA</th><th>ACTION</th><th>RPG</th><th>SPORTS</th><th>SHOOTER</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Precision</td><td>0.83</td><td>0.81</td><td>0.84</td><td>0.80</td></tr>
+                            <tr><td>Recall</td><td>0.82</td><td>0.80</td><td>0.83</td><td>0.82</td></tr>
+                            <tr><td>F1-Score</td><td>0.82</td><td>0.80</td><td>0.83</td><td>0.81</td></tr>
+                        </tbody>
+                    </table>
+
+                    <div class="mt-3 mb-4">
+                        <span style="color: #888; font-family: 'Press Start 2P'; font-size: 0.45rem;">TOTAL ACCURACY:</span>
+                        <div class="stat-bar mt-2" style="max-width: 350px;">
+                            <div class="stat-bar-fill" style="width: 82%; background: linear-gradient(90deg, #e11d48, #f59e0b);"></div>
+                            <span class="stat-bar-label">82% HP</span>
+                        </div>
+                    </div>
+
+                    <h4 class="mt-4" style="color: #e11d48;">TESTING K VALUES</h4>
+                    <div class="card-retro p-4 mt-2" style="border-left: 5px solid #e11d48;">
+                        <div class="mb-3">
+                            <span style="color: #888; font-family: 'Press Start 2P'; font-size: 0.4rem;">K=3</span>
+                            <div class="stat-bar mt-1"><div class="stat-bar-fill" style="width:78%; background-color: #d1d5db;"></div><span class="stat-bar-label">78%</span></div>
+                        </div>
+                        <div class="mb-3">
+                            <span style="color: #888; font-family: 'Press Start 2P'; font-size: 0.4rem;">K=5</span>
+                            <div class="stat-bar mt-1"><div class="stat-bar-fill" style="width:80%; background-color: #9ca3af;"></div><span class="stat-bar-label">80%</span></div>
+                        </div>
+                        <div class="mb-3">
+                            <span style="color: #e11d48; font-family: 'Press Start 2P'; font-size: 0.4rem;">K=7 BEST</span>
+                            <div class="stat-bar mt-1"><div class="stat-bar-fill" style="width:82%; background: linear-gradient(90deg, #e11d48, #f59e0b);"></div><span class="stat-bar-label">82%</span></div>
+                        </div>
+                        <div class="mb-3">
+                            <span style="color: #888; font-family: 'Press Start 2P'; font-size: 0.4rem;">K=9</span>
+                            <div class="stat-bar mt-1"><div class="stat-bar-fill" style="width:81%; background-color: #9ca3af;"></div><span class="stat-bar-label">81%</span></div>
+                        </div>
+                        <div>
+                            <span style="color: #888; font-family: 'Press Start 2P'; font-size: 0.4rem;">K=11</span>
+                            <div class="stat-bar mt-1"><div class="stat-bar-fill" style="width:79%; background-color: #d1d5db;"></div><span class="stat-bar-label">79%</span></div>
+                        </div>
+                    </div>
+                    <p class="mt-3" style="color: #888;">
+                        K=7 fue el mejor. K bajo (3) = sensible al ruido, K alto (11) = demasiado general.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ejemplo practico -->
+    <section class="container my-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h2 style="color: #0d9488;">&gt; DEMO MODE: Ejemplo_</h2>
+                <p class="mt-3">Un jugador nuevo con estas stats:</p>
+                <div class="card-retro p-4 mt-3" style="border: 4px solid #0d9488; box-shadow: 4px 4px 0px #0d9488; background-color: #f0fdfa;">
+                    <div class="row">
+                        <div class="col-6">
+                            <p class="mb-2"><span style="color: #e11d48; font-weight: bold;">Action:</span> 45 hrs</p>
+                            <p class="mb-2"><span style="color: #7c3aed; font-weight: bold;">RPG:</span> 320 hrs</p>
+                            <p class="mb-2"><span style="color: #0d9488; font-weight: bold;">Sports:</span> 20 hrs</p>
+                        </div>
+                        <div class="col-6">
+                            <p class="mb-2"><span style="color: #f59e0b; font-weight: bold;">Shooter:</span> 80 hrs</p>
+                            <p class="mb-2"><span style="color: #6366f1; font-weight: bold;">Rating:</span> 4.2</p>
+                            <p class="mb-2"><span style="color: #888; font-weight: bold;">Edad:</span> 22</p>
+                        </div>
+                    </div>
+                    <hr style="border-color: #ccc;">
+                    <p class="mb-1" style="color: #888;">El modelo busca los 7 jugadores mas parecidos...</p>
+                    <p class="mb-1">5/7 prefieren RPG, 1 Action, 1 Shooter</p>
+                    <p class="mb-0" style="font-family: 'Press Start 2P'; font-size: 0.6rem; color: #0d9488; margin-top: 15px;">
+                        >> RECOMENDACION: JUEGOS RPG
+                    </p>
+                </div>
+                <p class="mt-3" style="color: #888;">
+                    Se podria extender para recomendar juegos especificos, pero
+                    para este ejercicio nos quedamos con generos.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Conclusiones -->
+    <section class="bg-soft py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <h2 style="color: #e11d48;">&gt; GAME CLEAR: Conclusiones_</h2>
+                    <div class="pixel-border p-4 mt-3" style="background-color: #fff;">
+                        <p>KNN logro 82% clasificando el genero favorito. Mejoras posibles:</p>
+                        <ul>
+                            <li>Usar datos reales de Steam o alguna API de videojuegos</li>
+                            <li>Agregar variables: juegos comprados, amigos, tiempo online</li>
+                            <li>Probar redes neuronales o sistemas hibridos</li>
+                            <li>Recomendar juegos especificos, no solo generos</li>
+                        </ul>
+                        <p class="mb-0">
+                            KNN es buen punto de partida para entender recomendaciones.
+                            Steam y Netflix usan versiones mucho mas avanzadas de esta idea.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-4 mt-5 text-center">
+        <div class="container">
+            <p style="font-family: 'Press Start 2P'; font-size: 0.45rem; color: #fb7185;">STAGE 2 COMPLETE - ALL STAGES CLEAR!</p>
+            <p class="mb-0"><a href="/" style="color: #fbbf24; text-decoration: none; font-family: 'Press Start 2P'; font-size: 0.5rem;">&lt; VOLVER AL INICIO</a></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

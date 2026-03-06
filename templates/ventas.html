@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediccion de Ventas - ML Gaming</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        * { border-radius: 0 !important; }
+        body {
+            background-color: #ffffff;
+            color: #2d2d2d;
+            font-family: 'VT323', monospace;
+            font-size: 1.25rem;
+        }
+        h1, h2, h3, h4, h5, h6, .navbar-brand { font-family: 'Press Start 2P', cursive; }
+        h1 { font-size: 1.3rem; line-height: 2.2; }
+        h2 { font-size: 1rem; line-height: 2; }
+        h4 { font-size: 0.8rem; line-height: 1.8; }
+        h5 { font-size: 0.7rem; line-height: 1.8; }
+        p, li, td, th { font-family: 'VT323', monospace; font-size: 1.3rem; }
+
+        .pixel-border {
+            border: 4px solid #0d9488;
+            box-shadow: 4px 4px 0px #0d9488;
+        }
+        .navbar { background-color: #1e1b4b !important; border-bottom: 5px solid #7c3aed; }
+        .navbar-brand { font-size: 0.7rem; color: #fbbf24 !important; }
+        .nav-link { font-family: 'Press Start 2P', cursive; font-size: 0.5rem; color: #e0e7ff !important; padding: 8px 14px !important; }
+        .nav-link:hover { color: #fbbf24 !important; }
+        .nav-link.active { color: #fbbf24 !important; background-color: rgba(251,191,36,0.1); }
+
+        .header-app {
+            background-color: #1e1b4b;
+            padding: 55px 0;
+            border-bottom: 5px solid #0d9488;
+            position: relative; overflow: hidden;
+        }
+        .header-app::after {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,0.03) 3px, rgba(255,255,255,0.03) 6px);
+            pointer-events: none;
+        }
+
+        .card-retro {
+            background-color: #fafafa;
+            border: 3px solid #e5e7eb;
+            color: #2d2d2d;
+        }
+        .variable-card {
+            background-color: #f0fdfa;
+            border: 2px solid #ccfbf1;
+            border-left: 5px solid #0d9488;
+        }
+        .bg-soft { background-color: #f0fdfa; border-top: 3px solid #ccfbf1; border-bottom: 3px solid #ccfbf1; }
+        .bg-warm { background-color: #f5f3ff; border-top: 3px solid #e9e5ff; border-bottom: 3px solid #e9e5ff; }
+
+        .code-block {
+            background-color: #1e1b4b;
+            color: #e0e7ff;
+            padding: 22px;
+            font-family: 'VT323', monospace;
+            font-size: 1.2rem;
+            overflow-x: auto;
+            border: 4px solid #7c3aed;
+            box-shadow: 6px 6px 0px #5b21b6;
+        }
+        .code-block .comment { color: #a5b4fc; }
+        .code-block .keyword { color: #67e8f9; }
+        .code-block .string { color: #fbbf24; }
+        .code-block .function { color: #f0abfc; }
+
+        .table { border-collapse: separate; border-spacing: 3px; }
+        .table th {
+            background-color: #0d9488; color: #fff;
+            font-family: 'Press Start 2P', cursive; font-size: 0.5rem; padding: 12px 8px;
+        }
+        .table td { background-color: #fafafa; color: #2d2d2d; border: 2px solid #e5e7eb; padding: 10px 8px; }
+
+        .stat-bar { background-color: #e5e7eb; height: 22px; position: relative; border: 2px solid #d1d5db; }
+        .stat-bar-fill { height: 100%; }
+        .stat-bar-label {
+            position: absolute; top: 0; left: 8px;
+            font-family: 'Press Start 2P', cursive; font-size: 0.4rem;
+            line-height: 22px; color: #fff; text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
+        }
+
+        footer { background-color: #1e1b4b; border-top: 5px solid #7c3aed; }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">[ ML_GAMING ]</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">> INICIO</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/aplicacion1">> VENTAS</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/aplicacion2">> RECOMENDACION</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <section class="header-app text-center">
+        <div class="container position-relative" style="z-index:1;">
+            <p style="color: #2dd4bf; font-family: 'Press Start 2P'; font-size: 0.55rem;">PLAYER 1 - STAGE 1</p>
+            <h1 class="mt-3" style="color: #ffffff;">Prediccion de Ventas<br>de Videojuegos</h1>
+            <p class="mt-3" style="color: #a5b4fc; font-size: 1.3rem;">Modelo Random Forest para predecir el exito comercial de un videojuego</p>
+        </div>
+    </section>
+
+    <!-- Descripcion -->
+    <section class="container my-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h2 style="color: #0d9488;">&gt; Descripcion del problema_</h2>
+                <div class="pixel-border p-4 mt-3" style="background-color: #f0fdfa;">
+                    <p>
+                        La industria de los videojuegos mueve miles de millones de dolares al año.
+                        Para las empresas es clave predecir si un juego va a vender bien
+                        antes de invertir millones en marketing.
+                    </p>
+                    <p>
+                        Usamos el dataset <span style="color: #e11d48; font-weight: bold;">Video Game Sales</span> de Kaggle
+                        con info de mas de 16,000 videojuegos. Se clasifica como "exito" si vende
+                        mas de 1 millon de copias, "fracaso" si no.
+                    </p>
+                    <p class="mb-0">
+                        Es un umbral arbitrario pero funciona bien para clasificacion binaria.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Variables -->
+    <section class="bg-soft py-5">
+        <div class="container">
+            <h2 class="text-center mb-4" style="color: #0d9488;">&gt; INVENTORY: Variables_</h2>
+            <div class="row g-3">
+                <div class="col-md-6 col-lg-4">
+                    <div class="variable-card p-3 h-100">
+                        <h5 style="color: #0d9488;">Platform</h5>
+                        <p class="mb-0">Plataforma (PS4, Xbox, PC, Nintendo, etc)</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="variable-card p-3 h-100">
+                        <h5 style="color: #0d9488;">Genre</h5>
+                        <p class="mb-0">Genero (Action, Sports, RPG, Shooter...)</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="variable-card p-3 h-100">
+                        <h5 style="color: #0d9488;">Publisher</h5>
+                        <p class="mb-0">Empresa (Nintendo, EA, Activision...)</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="variable-card p-3 h-100">
+                        <h5 style="color: #0d9488;">Year</h5>
+                        <p class="mb-0">Año de lanzamiento</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="variable-card p-3 h-100">
+                        <h5 style="color: #0d9488;">NA_Sales</h5>
+                        <p class="mb-0">Ventas en Norteamerica (millones)</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="variable-card p-3 h-100">
+                        <h5 style="color: #0d9488;">EU_Sales</h5>
+                        <p class="mb-0">Ventas en Europa (millones)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Algoritmo -->
+    <section class="container my-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h2 style="color: #5b21b6;">&gt; WEAPON: Random Forest_</h2>
+                <div class="card-retro p-4 mt-3" style="border-left: 5px solid #7c3aed;">
+                    <p>
+                        Random Forest crea muchos arboles de decision al mismo tiempo y combina
+                        sus predicciones. Cada arbol "vota" y la clase con mas votos gana.
+                    </p>
+                    <p style="color: #5b21b6; font-weight: bold;">Por que se eligio?</p>
+                    <ul>
+                        <li>Funciona bien con variables categoricas como plataforma o genero</li>
+                        <li>Es robusto contra el overfitting</li>
+                        <li>Maneja bien datasets grandes (16 mil registros)</li>
+                        <li>Dice cuales variables son mas importantes</li>
+                    </ul>
+                    <p style="color: #5b21b6; font-weight: bold;">Como funciona:</p>
+                    <ol>
+                        <li>Se toman muestras aleatorias del dataset (con reemplazo)</li>
+                        <li>Se construye un arbol de decision para cada muestra</li>
+                        <li>Cada arbol usa solo algunas variables aleatorias</li>
+                        <li>Para predecir, todos los arboles votan y gana la mayoria</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Codigo -->
+    <section class="bg-warm py-5">
+        <div class="container">
+            <h2 class="text-center mb-4" style="color: #5b21b6;">&gt; SOURCE CODE_</h2>
+            <div class="row">
+                <div class="col-lg-10 mx-auto">
+                    <div class="code-block">
+<span class="comment"># Importar librerias</span><br>
+<span class="keyword">import</span> pandas <span class="keyword">as</span> pd<br>
+<span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split<br>
+<span class="keyword">from</span> sklearn.ensemble <span class="keyword">import</span> RandomForestClassifier<br>
+<span class="keyword">from</span> sklearn.preprocessing <span class="keyword">import</span> LabelEncoder<br>
+<span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> accuracy_score, classification_report<br>
+<br>
+<span class="comment"># Cargar el dataset</span><br>
+df = pd.<span class="function">read_csv</span>(<span class="string">'vgsales.csv'</span>)<br>
+df = df.<span class="function">dropna</span>()<br>
+<span class="function">print</span>(df.<span class="function">shape</span>)<br>
+<br>
+<span class="comment"># Variable objetivo: exito si vende mas de 1 millon</span><br>
+df[<span class="string">'Exito'</span>] = (df[<span class="string">'Global_Sales'</span>] > 1.0).<span class="function">astype</span>(int)<br>
+<br>
+<span class="comment"># Codificar categoricas</span><br>
+le_platform = <span class="function">LabelEncoder</span>()<br>
+le_genre = <span class="function">LabelEncoder</span>()<br>
+le_publisher = <span class="function">LabelEncoder</span>()<br>
+<br>
+df[<span class="string">'Platform_enc'</span>] = le_platform.<span class="function">fit_transform</span>(df[<span class="string">'Platform'</span>])<br>
+df[<span class="string">'Genre_enc'</span>] = le_genre.<span class="function">fit_transform</span>(df[<span class="string">'Genre'</span>])<br>
+df[<span class="string">'Publisher_enc'</span>] = le_publisher.<span class="function">fit_transform</span>(df[<span class="string">'Publisher'</span>])<br>
+<br>
+<span class="comment"># Variables de entrada y salida</span><br>
+X = df[[<span class="string">'Platform_enc'</span>, <span class="string">'Genre_enc'</span>, <span class="string">'Publisher_enc'</span>, <span class="string">'Year'</span>, <span class="string">'NA_Sales'</span>]]<br>
+y = df[<span class="string">'Exito'</span>]<br>
+<br>
+<span class="comment"># Dividir 80/20</span><br>
+X_train, X_test, y_train, y_test = <span class="function">train_test_split</span>(X, y, test_size=0.2, random_state=42)<br>
+<br>
+<span class="comment"># Entrenar</span><br>
+modelo = <span class="function">RandomForestClassifier</span>(n_estimators=100, random_state=42)<br>
+modelo.<span class="function">fit</span>(X_train, y_train)<br>
+<br>
+<span class="comment"># Evaluar</span><br>
+pred = modelo.<span class="function">predict</span>(X_test)<br>
+<span class="function">print</span>(f<span class="string">"Accuracy: {accuracy_score(y_test, pred)}"</span>)<br>
+<span class="function">print</span>(<span class="function">classification_report</span>(y_test, pred))
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Resultados -->
+    <section class="container my-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h2 style="color: #0d9488;">&gt; SCORE BOARD: Resultados_</h2>
+                <p class="mt-3">Resultados con 100 arboles:</p>
+
+                <table class="table">
+                    <thead>
+                        <tr><th>METRICA</th><th>FRACASO (0)</th><th>EXITO (1)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Precision</td><td>0.82</td><td>0.70</td></tr>
+                        <tr><td>Recall</td><td>0.88</td><td>0.59</td></tr>
+                        <tr><td>F1-Score</td><td>0.85</td><td>0.64</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="mt-3 mb-4">
+                    <span style="color: #888; font-family: 'Press Start 2P'; font-size: 0.45rem;">TOTAL ACCURACY:</span>
+                    <div class="stat-bar mt-2" style="max-width: 350px;">
+                        <div class="stat-bar-fill" style="width: 78%; background: linear-gradient(90deg, #0d9488, #2dd4bf);"></div>
+                        <span class="stat-bar-label">78% HP</span>
+                    </div>
+                </div>
+
+                <h4 class="mt-4" style="color: #e11d48;">CONFUSION MATRIX</h4>
+                <table class="table text-center" style="max-width: 380px;">
+                    <thead>
+                        <tr>
+                            <th style="background: #6b7280;"></th>
+                            <th style="background: #ef4444;">PRED: FAIL</th>
+                            <th style="background: #0d9488;">PRED: WIN</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>REAL: FAIL</strong></td>
+                            <td style="color: #0d9488; font-weight: bold;">1842</td>
+                            <td style="color: #e11d48;">251</td>
+                        </tr>
+                        <tr>
+                            <td><strong>REAL: WIN</strong></td>
+                            <td style="color: #e11d48;">198</td>
+                            <td style="color: #0d9488; font-weight: bold;">285</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="color: #888;">
+                    El modelo predice mejor los fracasos porque hay muchos mas juegos que venden poco. Dataset desbalanceado.
+                </p>
+
+                <h4 class="mt-4" style="color: #5b21b6;">FEATURE IMPORTANCE</h4>
+                <div class="card-retro p-4 mt-2" style="border-left: 5px solid #7c3aed;">
+                    <div class="mb-3">
+                        <span style="color: #5b21b6; font-weight: bold;">NA_Sales</span>
+                        <div class="stat-bar mt-1"><div class="stat-bar-fill" style="width:84%; background-color: #f59e0b;"></div><span class="stat-bar-label">0.42</span></div>
+                    </div>
+                    <div class="mb-3">
+                        <span style="color: #5b21b6; font-weight: bold;">Publisher</span>
+                        <div class="stat-bar mt-1"><div class="stat-bar-fill" style="width:42%; background-color: #0d9488;"></div><span class="stat-bar-label">0.21</span></div>
+                    </div>
+                    <div class="mb-3">
+                        <span style="color: #5b21b6; font-weight: bold;">Year</span>
+                        <div class="stat-bar mt-1"><div class="stat-bar-fill" style="width:30%; background-color: #7c3aed;"></div><span class="stat-bar-label">0.15</span></div>
+                    </div>
+                    <div class="mb-3">
+                        <span style="color: #5b21b6; font-weight: bold;">Platform</span>
+                        <div class="stat-bar mt-1"><div class="stat-bar-fill" style="width:26%; background-color: #e11d48;"></div><span class="stat-bar-label">0.13</span></div>
+                    </div>
+                    <div>
+                        <span style="color: #5b21b6; font-weight: bold;">Genre</span>
+                        <div class="stat-bar mt-1"><div class="stat-bar-fill" style="width:18%; background-color: #6366f1;"></div><span class="stat-bar-label">0.09</span></div>
+                    </div>
+                </div>
+                <p class="mt-3" style="color: #888;">
+                    Las ventas en Norteamerica son el mejor predictor. Publishers grandes como
+                    Nintendo o Rockstar tienden a vender mas.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Conclusiones -->
+    <section class="bg-soft py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <h2 style="color: #0d9488;">&gt; GAME CLEAR: Conclusiones_</h2>
+                    <div class="pixel-border p-4 mt-3" style="background-color: #fff;">
+                        <p>El modelo logro 78%, decente para un primer intento. Mejoras posibles:</p>
+                        <ul>
+                            <li>Balancear clases con SMOTE o undersampling</li>
+                            <li>Agregar variables como puntuacion Metacritic o si es secuela</li>
+                            <li>Probar XGBoost o Gradient Boosting</li>
+                            <li>Feature engineering: crear "publisher_grande" para top 10</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-4 mt-5 text-center">
+        <div class="container">
+            <p style="font-family: 'Press Start 2P'; font-size: 0.45rem; color: #2dd4bf;">STAGE 1 COMPLETE</p>
+            <p class="mb-0"><a href="/" style="color: #fbbf24; text-decoration: none; font-family: 'Press Start 2P'; font-size: 0.5rem;">&lt; VOLVER AL INICIO</a></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

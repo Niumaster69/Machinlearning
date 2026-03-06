@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Learning en Videojuegos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        * { border-radius: 0 !important; }
+        body {
+            background-color: #ffffff;
+            color: #2d2d2d;
+            font-family: 'VT323', monospace;
+            font-size: 1.25rem;
+        }
+        h1, h2, h3, h4, h5, h6, .navbar-brand { font-family: 'Press Start 2P', cursive; }
+        h1 { font-size: 1.5rem; line-height: 2.2; }
+        h2 { font-size: 1.05rem; line-height: 2; }
+        h4 { font-size: 0.8rem; line-height: 1.8; }
+        h5 { font-size: 0.7rem; line-height: 1.8; }
+        p, li, td, th { font-family: 'VT323', monospace; font-size: 1.3rem; }
+
+        .pixel-border {
+            border: 4px solid #5b21b6;
+            box-shadow: 4px 4px 0px #5b21b6;
+        }
+        .pixel-border-rose {
+            border: 4px solid #e11d48;
+            box-shadow: 4px 4px 0px #e11d48;
+        }
+        .pixel-border-teal {
+            border: 4px solid #0d9488;
+            box-shadow: 4px 4px 0px #0d9488;
+        }
+
+        .navbar {
+            background-color: #1e1b4b !important;
+            border-bottom: 5px solid #7c3aed;
+        }
+        .navbar-brand { font-size: 0.7rem; color: #fbbf24 !important; }
+        .nav-link {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.5rem;
+            color: #e0e7ff !important;
+            padding: 8px 14px !important;
+        }
+        .nav-link:hover { color: #fbbf24 !important; }
+        .nav-link.active {
+            color: #fbbf24 !important;
+            background-color: rgba(251,191,36,0.1);
+        }
+
+        .hero-section {
+            background-color: #1e1b4b;
+            padding: 65px 0;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 5px solid #7c3aed;
+        }
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(
+                0deg, transparent, transparent 3px,
+                rgba(255,255,255,0.03) 3px, rgba(255,255,255,0.03) 6px
+            );
+            pointer-events: none;
+        }
+
+        .card-retro {
+            background-color: #fafafa;
+            border: 3px solid #e5e7eb;
+            color: #2d2d2d;
+            transition: 0.2s;
+        }
+        .card-retro:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0px #7c3aed;
+            border-color: #7c3aed;
+        }
+
+        .bg-soft { background-color: #f5f3ff; border-top: 3px solid #e9e5ff; border-bottom: 3px solid #e9e5ff; }
+        .bg-warm { background-color: #fff7ed; border-top: 3px solid #ffedd5; border-bottom: 3px solid #ffedd5; }
+
+        .table { border-collapse: separate; border-spacing: 3px; }
+        .table th {
+            background-color: #7c3aed; color: #fff;
+            font-family: 'Press Start 2P', cursive; font-size: 0.5rem; padding: 12px 8px;
+        }
+        .table td {
+            background-color: #fafafa; color: #2d2d2d;
+            border: 2px solid #e5e7eb; padding: 10px 8px;
+        }
+
+        .list-group-item {
+            background-color: #fafafa;
+            border: 2px solid #e5e7eb;
+            color: #2d2d2d;
+            margin-bottom: 4px;
+        }
+
+        .stat-bar {
+            background-color: #e5e7eb;
+            height: 22px;
+            position: relative;
+            border: 2px solid #d1d5db;
+        }
+        .stat-bar-fill { height: 100%; }
+        .stat-bar-label {
+            position: absolute; top: 0; left: 8px;
+            font-family: 'Press Start 2P', cursive; font-size: 0.4rem;
+            line-height: 22px; color: #fff; text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+        }
+
+        .btn-pixel {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.5rem;
+            padding: 10px 18px;
+            border: 3px solid;
+            background: none;
+            text-transform: uppercase;
+            text-decoration: none;
+            display: inline-block;
+            transition: 0.15s;
+        }
+        .btn-pixel:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0px;
+        }
+        .btn-teal { border-color: #0d9488; color: #0d9488; }
+        .btn-teal:hover { background-color: #0d9488; color: #fff; }
+        .btn-rose { border-color: #e11d48; color: #e11d48; }
+        .btn-rose:hover { background-color: #e11d48; color: #fff; }
+
+        footer {
+            background-color: #1e1b4b;
+            border-top: 5px solid #7c3aed;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">[ ML_GAMING ]</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" href="/">> INICIO</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/aplicacion1">> VENTAS</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/aplicacion2">> RECOMENDACION</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero-section text-center">
+        <div class="container position-relative" style="z-index: 1;">
+            <p style="color: #fbbf24; font-family: 'Press Start 2P'; font-size: 0.6rem;">- PRESS START -</p>
+            <h1 class="mt-3" style="color: #ffffff;">Machine Learning<br>aplicado a Videojuegos</h1>
+            <p class="mt-4" style="color: #c4b5fd; font-size: 1.4rem;">
+                &gt; Caso de uso: Como los algoritmos de aprendizaje automatico<br>
+                &gt; se utilizan en la industria del gaming
+            </p>
+            <hr style="border-color: #7c3aed; width: 200px; margin: 25px auto; border-width: 3px;">
+            <p style="color: #a5b4fc;">MATERIA: MACHINE LEARNING // UNIVERSIDAD // 2025</p>
+        </div>
+    </section>
+
+    <!-- Que es -->
+    <section class="container my-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h2 style="color: #5b21b6;">&gt; Que es ML en videojuegos?_</h2>
+                <div class="pixel-border p-4 mt-3" style="background-color: #faf5ff;">
+                    <p>
+                        El machine learning es una rama de la inteligencia artificial donde las
+                        computadoras aprenden patrones a partir de datos sin que uno las programe
+                        directamente para eso. En la industria de los videojuegos esto se ha vuelto
+                        super importante porque se generan cantidades enormes de datos: estadisticas
+                        de jugadores, ventas, comportamiento en el juego, reviews, etc.
+                    </p>
+                    <p>
+                        Empresas como Valve, EA, Riot Games y Nintendo usan machine learning
+                        para mejorar el matchmaking, predecir ventas, detectar trampas
+                        y recomendar juegos a los usuarios.
+                    </p>
+                    <p class="mb-0">
+                        En este trabajo se muestran <span style="color: #e11d48; font-weight: bold;">2 aplicaciones concretas</span>
+                        de machine learning en el mundo gaming usando clasificacion supervisada.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tipos de aprendizaje -->
+    <section class="bg-soft py-5">
+        <div class="container">
+            <h2 class="text-center mb-4" style="color: #5b21b6;">&gt; SELECT LEARNING TYPE_</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card-retro p-3 h-100" style="border-left: 5px solid #0d9488;">
+                        <h5 style="color: #0d9488;" class="mb-3">[ SUPERVISADO ]</h5>
+                        <p>
+                            El modelo aprende con datos etiquetados. Ejemplo: datos de juegos
+                            donde ya sabemos si vendieron bien o mal.
+                            <span style="color: #e11d48; font-weight: bold;">Es el que usamos en este trabajo.</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card-retro p-3 h-100" style="border-left: 5px solid #7c3aed;">
+                        <h5 style="color: #7c3aed;" class="mb-3">[ NO SUPERVISADO ]</h5>
+                        <p>
+                            No hay etiquetas. El algoritmo encuentra agrupaciones solo.
+                            En gaming agrupa jugadores por comportamiento
+                            o encuentra comunidades similares.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card-retro p-3 h-100" style="border-left: 5px solid #e11d48;">
+                        <h5 style="color: #e11d48;" class="mb-3">[ POR REFUERZO ]</h5>
+                        <p>
+                            Aprende por prueba y error con recompensas. Muy usado para crear
+                            NPCs inteligentes y bots que aprenden solos
+                            (como el bot de OpenAI en Dota 2).
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Las 2 aplicaciones -->
+    <section class="container my-5">
+        <h2 class="text-center mb-2" style="color: #5b21b6;">&gt; CHOOSE YOUR APP_</h2>
+        <p class="text-center mb-4" style="color: #999; font-family: 'Press Start 2P'; font-size: 0.45rem;">PLAYER 1 &amp; PLAYER 2</p>
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-5">
+                <div class="pixel-border-teal p-4 h-100" style="background-color: #f0fdfa;">
+                    <p style="color: #fff; background-color: #0d9488; display: inline-block; padding: 4px 12px; font-family: 'Press Start 2P'; font-size: 0.45rem;">PLAYER 1</p>
+                    <h4 class="mt-3" style="color: #0d9488;">Prediccion de Ventas</h4>
+                    <p>
+                        Con un dataset de ventas globales se predice si un juego
+                        va a tener exito comercial basandose en plataforma, genero y publisher.
+                    </p>
+                    <div class="mb-2">
+                        <small style="color: #888;">ALGORITMO:</small><br>
+                        <span style="color: #0d9488; font-weight: bold;">Random Forest</span>
+                    </div>
+                    <div class="mb-3">
+                        <small style="color: #888;">PRECISION:</small>
+                        <div class="stat-bar mt-1">
+                            <div class="stat-bar-fill" style="width: 78%; background-color: #0d9488;"></div>
+                            <span class="stat-bar-label">78%</span>
+                        </div>
+                    </div>
+                    <a href="/aplicacion1" class="btn-pixel btn-teal">&gt; JUGAR</a>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="pixel-border-rose p-4 h-100" style="background-color: #fff1f2;">
+                    <p style="color: #fff; background-color: #e11d48; display: inline-block; padding: 4px 12px; font-family: 'Press Start 2P'; font-size: 0.45rem;">PLAYER 2</p>
+                    <h4 class="mt-3" style="color: #e11d48;">Recomendacion de Juegos</h4>
+                    <p>
+                        Usando datos de jugadores se recomienda generos de juegos
+                        encontrando perfiles de gustos similares.
+                    </p>
+                    <div class="mb-2">
+                        <small style="color: #888;">ALGORITMO:</small><br>
+                        <span style="color: #e11d48; font-weight: bold;">K-Nearest Neighbors</span>
+                    </div>
+                    <div class="mb-3">
+                        <small style="color: #888;">PRECISION:</small>
+                        <div class="stat-bar mt-1">
+                            <div class="stat-bar-fill" style="width: 82%; background-color: #e11d48;"></div>
+                            <span class="stat-bar-label">82%</span>
+                        </div>
+                    </div>
+                    <a href="/aplicacion2" class="btn-pixel btn-rose">&gt; JUGAR</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tabla comparativa -->
+    <section class="bg-warm py-5">
+        <div class="container">
+            <h2 class="text-center mb-4" style="color: #5b21b6;">&gt; STATS COMPARISON_</h2>
+            <div class="table-responsive">
+                <table class="table text-center">
+                    <thead>
+                        <tr><th>STAT</th><th>PREDICCION VENTAS</th><th>RECOMENDACION</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Dataset</td><td>Video Game Sales (16,598 reg)</td><td>Ratings jugadores (5,000 reg)</td></tr>
+                        <tr><td>Problema</td><td>Clasif. binaria (exito/fracaso)</td><td>Clasif. multiclase (genero)</td></tr>
+                        <tr><td>Algoritmo</td><td style="color: #0d9488; font-weight: bold;">Random Forest</td><td style="color: #e11d48; font-weight: bold;">KNN (K=7)</td></tr>
+                        <tr><td>Variables</td><td>5</td><td>6</td></tr>
+                        <tr><td>Accuracy</td><td style="color: #0d9488; font-weight: bold;">78%</td><td style="color: #e11d48; font-weight: bold;">82%</td></tr>
+                        <tr><td>Libreria</td><td>scikit-learn</td><td>scikit-learn</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Proceso -->
+    <section class="container my-5">
+        <h2 class="text-center mb-4" style="color: #5b21b6;">&gt; QUEST LOG: Proceso de ML_</h2>
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="list-group">
+                    <div class="list-group-item" style="border-left: 5px solid #0d9488;">
+                        <span style="color: #0d9488; font-family: 'Press Start 2P'; font-size: 0.45rem;">STEP 01</span><br>
+                        <strong style="color: #5b21b6;">Recoleccion de datos</strong> - Datasets de Kaggle o datos simulados de jugadores.
+                    </div>
+                    <div class="list-group-item" style="border-left: 5px solid #7c3aed;">
+                        <span style="color: #7c3aed; font-family: 'Press Start 2P'; font-size: 0.45rem;">STEP 02</span><br>
+                        <strong style="color: #5b21b6;">Preprocesamiento</strong> - Limpiar datos nulos, codificar variables categoricas.
+                    </div>
+                    <div class="list-group-item" style="border-left: 5px solid #e11d48;">
+                        <span style="color: #e11d48; font-family: 'Press Start 2P'; font-size: 0.45rem;">STEP 03</span><br>
+                        <strong style="color: #5b21b6;">Division del dataset</strong> - 80% entrenamiento, 20% pruebas.
+                    </div>
+                    <div class="list-group-item" style="border-left: 5px solid #f59e0b;">
+                        <span style="color: #f59e0b; font-family: 'Press Start 2P'; font-size: 0.45rem;">STEP 04</span><br>
+                        <strong style="color: #5b21b6;">Entrenamiento</strong> - Se elige el algoritmo y se entrena.
+                    </div>
+                    <div class="list-group-item" style="border-left: 5px solid #0d9488;">
+                        <span style="color: #0d9488; font-family: 'Press Start 2P'; font-size: 0.45rem;">STEP 05</span><br>
+                        <strong style="color: #5b21b6;">Evaluacion</strong> - Accuracy, precision, recall, F1-score, matriz de confusion.
+                    </div>
+                    <div class="list-group-item" style="border-left: 5px solid #7c3aed;">
+                        <span style="color: #7c3aed; font-family: 'Press Start 2P'; font-size: 0.45rem;">STEP 06</span><br>
+                        <strong style="color: #5b21b6;">Prediccion</strong> - El modelo entrenado predice con datos nuevos.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ejemplos reales -->
+    <section class="bg-soft py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <h2 class="mb-4" style="color: #5b21b6;">&gt; HIGH SCORES: Empresas reales_</h2>
+                    <div class="pixel-border p-4" style="background-color: #fff;">
+                        <ul style="list-style: none; padding: 0;">
+                            <li class="mb-3"><span style="color: #e11d48;">&#9632;</span> <strong style="color: #5b21b6;">Riot Games (LoL)</strong> - ML para matchmaking, emparejando jugadores de nivel similar</li>
+                            <li class="mb-3"><span style="color: #0d9488;">&#9632;</span> <strong style="color: #5b21b6;">Valve (Steam)</strong> - Sistema de recomendaciones de la tienda con algoritmos de ML</li>
+                            <li class="mb-3"><span style="color: #f59e0b;">&#9632;</span> <strong style="color: #5b21b6;">EA Sports (FC)</strong> - Ajusta dificultad segun como juega el usuario</li>
+                            <li class="mb-0"><span style="color: #7c3aed;">&#9632;</span> <strong style="color: #5b21b6;">Epic Games (Fortnite)</strong> - Detecta cheaters y comportamiento toxico</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-4 mt-5 text-center">
+        <div class="container">
+            <p style="font-family: 'Press Start 2P'; font-size: 0.45rem; color: #fbbf24;">
+                GAME OVER? NO, JUST THE BEGINNING
+            </p>
+            <p class="mb-0" style="color: #a5b4fc; font-size: 1rem;">Proyecto Machine Learning - 2025 // Universidad</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
