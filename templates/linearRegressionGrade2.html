@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linear Regression to Predict Grades</title>
+</head>
+<body>
+    <h1>Linear Regression to Predict Grades</h1>
+    <p>Enter the number of study hours:</p>
+    <form method="post">
+        <label for="hours">Study Hours:</label>
+        <input type="number" id="hours" name="hours" placeholder="Study Hours" required>
+        <button type="submit">Predict Grade</button>
+    </form>
+    <p id="result"></p>
+    {% if result is not none %}
+        <h2>Estimated Grade: {{ result }}</h2>
+    {% endif %}
+</body>
+</html>
