@@ -1,37 +1,190 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logistic Regression - Purchase Prediction</title>
+    <title>Regresion Logistica - Machine Learning</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #4f6ef7;
+            --accent-soft: #eef1fe;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --bg: #ffffff;
+            --bg-alt: #f8fafc;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; color:var(--text); background:var(--bg); overflow-x:hidden; }
+        h1,h2,h3,h4,h5 { font-weight:700; letter-spacing:-0.025em; }
+        p { line-height:1.75; color:var(--text-secondary); }
+
+        .navbar { background:rgba(255,255,255,0.92)!important; backdrop-filter:blur(24px); border-bottom:1px solid var(--border); padding:0.9rem 0; }
+        .navbar-brand { font-weight:800; font-size:1rem; color:var(--text)!important; letter-spacing:-0.04em; }
+        .nav-link { color:var(--text-secondary)!important; font-weight:500; font-size:0.85rem; padding:0.5rem 1rem!important; transition:color 0.2s; }
+        .nav-link:hover,.nav-link.active { color:var(--accent)!important; }
+        .dropdown-menu { background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:0.5rem; min-width:230px; box-shadow:0 12px 32px rgba(0,0,0,0.08); }
+        .dropdown-item { color:var(--text-secondary); border-radius:10px; padding:0.65rem 1rem; font-size:0.85rem; }
+        .dropdown-item:hover { background:var(--accent-soft); color:var(--accent); }
+        .dropdown-item small { color:var(--text-muted); }
+
+        .hero-page { background:linear-gradient(135deg, #eef1fe 0%, #f8fafc 100%); padding:8rem 0 5rem; position:relative; overflow:hidden; }
+        .hero-page::before { content:''; position:absolute; bottom:-40%; right:-15%; width:500px; height:500px; background:radial-gradient(circle,rgba(79,110,247,0.08),transparent 65%); animation:drift 18s ease-in-out infinite; }
+        @keyframes drift { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-20px,25px)} }
+        .hero-page h1 { font-size:clamp(1.8rem,4vw,2.8rem); color:var(--text); font-weight:800; line-height:1.15; }
+        .hero-page p { color:var(--text-secondary); font-size:1.05rem; }
+        .badge-line { display:inline-block; color:var(--text-muted); font-size:0.75rem; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:1.2rem; border-left:2px solid var(--accent); padding-left:0.75rem; }
+
+        .section { padding:5rem 0; }
+        .section-label { text-transform:uppercase; font-weight:600; font-size:0.75rem; letter-spacing:0.12em; color:var(--accent); margin-bottom:0.6rem; }
+        .info-box { background:var(--bg-alt); border:1px solid var(--border); border-radius:16px; padding:2rem; }
+
+        .form-card { background:var(--bg); border:1px solid var(--border); border-radius:20px; padding:2.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.04); }
+        .form-label { font-weight:600; font-size:0.88rem; color:var(--text); }
+        .form-control { border:1.5px solid var(--border); border-radius:12px; padding:0.75rem 1rem; font-size:1rem; transition:border-color 0.2s; }
+        .form-control:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(79,110,247,0.1); }
+        .btn-submit { background:var(--accent); color:#fff; border:none; border-radius:12px; padding:0.75rem 2rem; font-weight:600; font-size:0.93rem; width:100%; cursor:pointer; transition:all 0.2s; }
+        .btn-submit:hover { background:#3d5ce5; transform:translateY(-1px); }
+
+        .result-box { border-radius:16px; padding:1.5rem; text-align:center; margin-top:1.5rem; }
+        .result-success { background:#ecfdf5; border:1px solid #a7f3d0; }
+        .result-fail { background:#fef2f2; border:1px solid #fecaca; }
+        .result-value { font-size:1.5rem; font-weight:800; }
+
+        .btn-back { display:inline-flex; align-items:center; gap:0.5rem; color:var(--accent); text-decoration:none; font-weight:600; font-size:0.88rem; }
+        .btn-back:hover { opacity:0.7; color:var(--accent); }
+        footer { background:var(--bg-alt); border-top:1px solid var(--border); color:var(--text-muted); padding:3rem 0; }
+
+        .fade-up { opacity:0; transform:translateY(25px); transition:all 0.5s ease; }
+        .fade-up.visible { opacity:1; transform:translateY(0); }
+    </style>
 </head>
 <body>
-    <h1>Logistic Regression to Predict Purchase</h1>
-    <p>Enter the customer data:</p>
-    <form method="post">
-        <label for="edad">Edad:</label>
-        <input type="number" id="edad" name="edad" placeholder="Ej: 30" required><br><br>
 
-        <label for="ingreso_mensual">Ingreso Mensual:</label>
-        <input type="number" id="ingreso_mensual" name="ingreso_mensual" placeholder="Ej: 3500000" required><br><br>
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">Machine Learning</a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/use-cases">Use Cases</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Supervised Learning</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/linear-regression/concepts">Basic Concepts</a></li>
+                            <li><a class="dropdown-item" href="/linear-regression/application">Application</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">Activity 1</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/linearRegression/">Linear Regression<br><small>Grade prediction</small></a></li>
+                            <li><a class="dropdown-item" href="/logisticRegression/" style="background:var(--accent-soft);">Logistic Regression<br><small>Purchase prediction</small></a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-        <label for="visitas_web_mes">Visitas Web al Mes:</label>
-        <input type="number" id="visitas_web_mes" name="visitas_web_mes" placeholder="Ej: 10" required><br><br>
+    <section class="hero-page">
+        <div class="container position-relative" style="z-index:2;">
+            <div class="badge-line">Actividad 1 &mdash; Regresion Logistica</div>
+            <h1>Prediccion de Compra<br>con Regresion Logistica</h1>
+            <p class="mt-3" style="max-width:480px;">Predice si un cliente realizara una compra basandose en sus datos de comportamiento</p>
+        </div>
+    </section>
 
-        <label for="tiempo_sitio_min">Tiempo en Sitio (min):</label>
-        <input type="number" step="0.1" id="tiempo_sitio_min" name="tiempo_sitio_min" placeholder="Ej: 15.5" required><br><br>
+    <section class="section">
+        <div class="container">
+            <div class="row g-5">
+                <div class="col-lg-5 fade-up">
+                    <div class="section-label">Concepto</div>
+                    <h2 style="font-size:1.5rem;">Como funciona?</h2>
+                    <div class="info-box mt-3" style="border-left:3px solid var(--accent);">
+                        <p>La <strong>regresion logistica</strong> es un algoritmo de clasificacion que predice la probabilidad de que un evento ocurra (compra o no compra).</p>
+                        <p>A diferencia de la regresion lineal, usa una funcion <strong>sigmoide</strong> que transforma la salida en un valor entre 0 y 1.</p>
+                        <p class="mb-0">Si la probabilidad supera 0.5, se clasifica como "compra". De lo contrario, como "no compra".</p>
+                    </div>
+                </div>
+                <div class="col-lg-7 fade-up">
+                    <div class="form-card">
+                        <h5 class="mb-1">Predecir compra</h5>
+                        <p class="mb-4" style="font-size:0.88rem;">Ingresa los datos del cliente para predecir si realizara una compra.</p>
+                        <form method="post" action="/logisticRegression/#result">
+                            <div class="row g-3">
+                                <div class="col-sm-6">
+                                    <label for="edad" class="form-label">Edad</label>
+                                    <input type="number" class="form-control" id="edad" name="edad" placeholder="Ej: 30" required>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label for="ingreso_mensual" class="form-label">Ingreso mensual</label>
+                                    <input type="number" class="form-control" id="ingreso_mensual" name="ingreso_mensual" placeholder="Ej: 3500000" required>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label for="visitas_web_mes" class="form-label">Visitas web / mes</label>
+                                    <input type="number" class="form-control" id="visitas_web_mes" name="visitas_web_mes" placeholder="Ej: 10" required>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label for="tiempo_sitio_min" class="form-label">Tiempo en sitio (min)</label>
+                                    <input type="number" step="0.1" class="form-control" id="tiempo_sitio_min" name="tiempo_sitio_min" placeholder="Ej: 15.5" required>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label for="compras_previas" class="form-label">Compras previas</label>
+                                    <input type="number" class="form-control" id="compras_previas" name="compras_previas" placeholder="Ej: 5" required>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label for="descuento_usado" class="form-label">Descuento usado</label>
+                                    <select class="form-control" id="descuento_usado" name="descuento_usado" required>
+                                        <option value="" disabled selected>Seleccionar</option>
+                                        <option value="0">No</option>
+                                        <option value="1">Si</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 mt-4">
+                                    <button type="submit" class="btn-submit">Predecir compra</button>
+                                </div>
+                            </div>
+                        </form>
+                        <div id="result"></div>
+                        {% if result is not none %}
+                            {% if result == 1 %}
+                            <div class="result-box result-success">
+                                <p class="mb-1" style="font-size:0.78rem; color:#059669; text-transform:uppercase; letter-spacing:0.08em; font-weight:600;">Resultado</p>
+                                <div class="result-value" style="color:#059669;">COMPRA</div>
+                                <p class="mb-0 mt-1" style="font-size:0.85rem; color:var(--text-secondary);">El modelo predice que el cliente SI realizara la compra</p>
+                            </div>
+                            {% else %}
+                            <div class="result-box result-fail">
+                                <p class="mb-1" style="font-size:0.78rem; color:#dc2626; text-transform:uppercase; letter-spacing:0.08em; font-weight:600;">Resultado</p>
+                                <div class="result-value" style="color:#dc2626;">NO COMPRA</div>
+                                <p class="mb-0 mt-1" style="font-size:0.85rem; color:var(--text-secondary);">El modelo predice que el cliente NO realizara la compra</p>
+                            </div>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-        <label for="compras_previas">Compras Previas:</label>
-        <input type="number" id="compras_previas" name="compras_previas" placeholder="Ej: 5" required><br><br>
+    <footer class="text-center">
+        <div class="container">
+            <a href="/" class="btn-back">&larr; Back to Home</a>
+            <p class="mt-3 mb-1" style="font-size:0.85rem;">Duvan Lozano Romero &mdash; Systems Engineering</p>
+            <p class="mb-0" style="font-size:0.8rem;">Universidad de Cundinamarca &mdash; Extension Chia &mdash; 2026</p>
+        </div>
+    </footer>
 
-        <label for="descuento_usado">Descuento Usado (0=No, 1=Si):</label>
-        <input type="number" id="descuento_usado" name="descuento_usado" min="0" max="1" placeholder="0 o 1" required><br><br>
-
-        <button type="submit">Predict</button>
-    </form>
-    <p id="result"></p>
-    {% if result is not none %}
-        <h2>Resultado: {% if result == 1 %}COMPRA{% else %}NO COMPRA{% endif %}</h2>
-    {% endif %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const obs = new IntersectionObserver(entries => { entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }); }, {threshold:0.1});
+        document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+    </script>
 </body>
 </html>

@@ -1,382 +1,335 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Machine Learning en Videojuegos</title>
+    <title>Machine Learning</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * { border-radius: 0 !important; }
-        body {
-            background-color: #ffffff;
-            color: #2d2d2d;
-            font-family: 'VT323', monospace;
-            font-size: 1.25rem;
+        :root {
+            --accent: #4f6ef7;
+            --accent-soft: #eef1fe;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --bg: #ffffff;
+            --bg-alt: #f8fafc;
+            --bg-hero: linear-gradient(135deg, #eef1fe 0%, #f0f4ff 40%, #f8fafc 100%);
+            --success: #059669;
+            --danger: #dc2626;
         }
-        h1, h2, h3, h4, h5, h6, .navbar-brand { font-family: 'Press Start 2P', cursive; }
-        h1 { font-size: 1.5rem; line-height: 2.2; }
-        h2 { font-size: 1.05rem; line-height: 2; }
-        h4 { font-size: 0.8rem; line-height: 1.8; }
-        h5 { font-size: 0.7rem; line-height: 1.8; }
-        p, li, td, th { font-family: 'VT323', monospace; font-size: 1.3rem; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; color:var(--text); background:var(--bg); overflow-x:hidden; }
+        h1,h2,h3,h4,h5 { font-weight:700; letter-spacing:-0.025em; }
+        p { line-height:1.75; color:var(--text-secondary); }
 
-        .pixel-border {
-            border: 4px solid #5b21b6;
-            box-shadow: 4px 4px 0px #5b21b6;
-        }
-        .pixel-border-rose {
-            border: 4px solid #e11d48;
-            box-shadow: 4px 4px 0px #e11d48;
-        }
-        .pixel-border-teal {
-            border: 4px solid #0d9488;
-            box-shadow: 4px 4px 0px #0d9488;
-        }
+        /* Navbar */
+        .navbar { background:rgba(255,255,255,0.92)!important; backdrop-filter:blur(24px); border-bottom:1px solid var(--border); padding:0.9rem 0; }
+        .navbar-brand { font-weight:800; font-size:1rem; color:var(--text)!important; letter-spacing:-0.04em; }
+        .nav-link { color:var(--text-secondary)!important; font-weight:500; font-size:0.85rem; padding:0.5rem 1rem!important; transition:color 0.2s; }
+        .nav-link:hover,.nav-link.active { color:var(--accent)!important; }
+        .dropdown-menu { background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:0.5rem; min-width:230px; margin-top:0.5rem; box-shadow:0 12px 32px rgba(0,0,0,0.08); }
+        .dropdown-item { color:var(--text-secondary); border-radius:10px; padding:0.65rem 1rem; font-size:0.85rem; transition:background 0.15s; }
+        .dropdown-item:hover { background:var(--accent-soft); color:var(--accent); }
+        .dropdown-item small { color:var(--text-muted); }
 
-        .navbar {
-            background-color: #1e1b4b !important;
-            border-bottom: 5px solid #7c3aed;
+        /* Hero */
+        .hero {
+            background:var(--bg-hero);
+            min-height:90vh;
+            display:flex;
+            align-items:center;
+            position:relative;
+            overflow:hidden;
+            padding-top:5rem;
         }
-        .navbar-brand { font-size: 0.7rem; color: #fbbf24 !important; }
-        .nav-link {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 0.5rem;
-            color: #e0e7ff !important;
-            padding: 8px 14px !important;
+        .hero::before {
+            content:'';
+            position:absolute;
+            top:-20%; right:-10%;
+            width:600px; height:600px;
+            background:radial-gradient(circle, rgba(79,110,247,0.08) 0%, transparent 65%);
+            animation:drift 18s ease-in-out infinite;
         }
-        .nav-link:hover { color: #fbbf24 !important; }
-        .nav-link.active {
-            color: #fbbf24 !important;
-            background-color: rgba(251,191,36,0.1);
+        .hero::after {
+            content:'';
+            position:absolute;
+            bottom:-15%; left:-10%;
+            width:400px; height:400px;
+            background:radial-gradient(circle, rgba(79,110,247,0.05) 0%, transparent 65%);
+            animation:drift 22s ease-in-out infinite reverse;
         }
+        @keyframes drift { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-25px,-15px)} }
+        .hero-grid {
+            position:absolute; top:0; left:0; right:0; bottom:0;
+            background-image: linear-gradient(rgba(79,110,247,0.04) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(79,110,247,0.04) 1px, transparent 1px);
+            background-size:70px 70px;
+            transform:perspective(600px) rotateX(55deg);
+            transform-origin:center top;
+            opacity:0.5;
+        }
+        .hero h1 { font-size:clamp(2.2rem,5vw,3.8rem); font-weight:800; color:var(--text); line-height:1.15; letter-spacing:-0.035em; }
+        .hero h1 span { color:var(--accent); }
+        .hero p.lead { color:var(--text-secondary); font-size:1.1rem; max-width:500px; }
+        .badge-line { display:inline-block; color:var(--text-muted); font-size:0.78rem; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:1.5rem; border-left:2px solid var(--accent); padding-left:0.75rem; }
 
-        .hero-section {
-            background-color: #1e1b4b;
-            padding: 65px 0;
-            position: relative;
-            overflow: hidden;
-            border-bottom: 5px solid #7c3aed;
-        }
-        .hero-section::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: repeating-linear-gradient(
-                0deg, transparent, transparent 3px,
-                rgba(255,255,255,0.03) 3px, rgba(255,255,255,0.03) 6px
-            );
-            pointer-events: none;
-        }
+        /* Sections */
+        .section { padding:5.5rem 0; }
+        .section-alt { background:var(--bg-alt); }
+        .section-label { text-transform:uppercase; font-weight:600; font-size:0.75rem; letter-spacing:0.12em; color:var(--accent); margin-bottom:0.6rem; }
+        .section-title { font-size:1.85rem; margin-bottom:0.5rem; }
+        .section-sub { color:var(--text-muted); font-size:1rem; margin-bottom:3rem; }
 
-        .card-retro {
-            background-color: #fafafa;
-            border: 3px solid #e5e7eb;
-            color: #2d2d2d;
-            transition: 0.2s;
+        /* Cards */
+        .card-clean {
+            background:var(--bg);
+            border:1px solid var(--border);
+            border-radius:16px;
+            padding:2rem;
+            transition:all 0.3s ease;
+            height:100%;
         }
-        .card-retro:hover {
-            transform: translate(-2px, -2px);
-            box-shadow: 4px 4px 0px #7c3aed;
-            border-color: #7c3aed;
-        }
+        .card-clean:hover { transform:translateY(-3px); box-shadow:0 16px 40px rgba(0,0,0,0.06); border-color:var(--accent); }
+        .card-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.85rem; margin-bottom:1.2rem; }
 
-        .bg-soft { background-color: #f5f3ff; border-top: 3px solid #e9e5ff; border-bottom: 3px solid #e9e5ff; }
-        .bg-warm { background-color: #fff7ed; border-top: 3px solid #ffedd5; border-bottom: 3px solid #ffedd5; }
+        /* App cards */
+        .app-card { border-radius:20px; padding:2.5rem; transition:all 0.3s; position:relative; overflow:hidden; border:1px solid var(--border); background:var(--bg); }
+        .app-card:hover { transform:translateY(-3px); box-shadow:0 20px 50px rgba(0,0,0,0.06); }
+        .app-num { font-size:5rem; font-weight:800; position:absolute; top:-0.5rem; right:1rem; color:var(--accent); opacity:0.06; line-height:1; }
+        .tag { display:inline-block; padding:0.25rem 0.8rem; border-radius:50px; font-size:0.72rem; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; }
 
-        .table { border-collapse: separate; border-spacing: 3px; }
-        .table th {
-            background-color: #7c3aed; color: #fff;
-            font-family: 'Press Start 2P', cursive; font-size: 0.5rem; padding: 12px 8px;
-        }
-        .table td {
-            background-color: #fafafa; color: #2d2d2d;
-            border: 2px solid #e5e7eb; padding: 10px 8px;
-        }
+        /* Progress */
+        .progress-bar-custom { height:6px; background:var(--border-light); border-radius:50px; overflow:hidden; margin-top:0.5rem; }
+        .progress-fill { height:100%; border-radius:50px; }
 
-        .list-group-item {
-            background-color: #fafafa;
-            border: 2px solid #e5e7eb;
-            color: #2d2d2d;
-            margin-bottom: 4px;
-        }
+        /* Buttons */
+        .btn-main { display:inline-flex; align-items:center; gap:0.5rem; padding:0.7rem 1.4rem; border-radius:10px; font-weight:600; font-size:0.85rem; text-decoration:none; transition:all 0.2s; border:1.5px solid var(--accent); color:var(--accent); background:transparent; }
+        .btn-main:hover { background:var(--accent); color:#fff; }
+        .btn-main-fill { background:var(--accent); color:#fff; border-color:var(--accent); }
+        .btn-main-fill:hover { background:#3d5ce5; color:#fff; }
 
-        .stat-bar {
-            background-color: #e5e7eb;
-            height: 22px;
-            position: relative;
-            border: 2px solid #d1d5db;
-        }
-        .stat-bar-fill { height: 100%; }
-        .stat-bar-label {
-            position: absolute; top: 0; left: 8px;
-            font-family: 'Press Start 2P', cursive; font-size: 0.4rem;
-            line-height: 22px; color: #fff; text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
-        }
+        /* Table */
+        .table-clean { width:100%; border-collapse:collapse; }
+        .table-clean th { background:var(--accent-soft); color:var(--accent); font-weight:600; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.06em; padding:0.9rem 1rem; text-align:left; }
+        .table-clean td { padding:0.8rem 1rem; border-bottom:1px solid var(--border-light); font-size:0.93rem; color:var(--text-secondary); }
+        .table-clean tbody tr:hover { background:var(--bg-alt); }
 
-        .btn-pixel {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 0.5rem;
-            padding: 10px 18px;
-            border: 3px solid;
-            background: none;
-            text-transform: uppercase;
-            text-decoration: none;
-            display: inline-block;
-            transition: 0.15s;
-        }
-        .btn-pixel:hover {
-            transform: translate(-2px, -2px);
-            box-shadow: 4px 4px 0px;
-        }
-        .btn-teal { border-color: #0d9488; color: #0d9488; }
-        .btn-teal:hover { background-color: #0d9488; color: #fff; }
-        .btn-rose { border-color: #e11d48; color: #e11d48; }
-        .btn-rose:hover { background-color: #e11d48; color: #fff; }
+        /* Steps */
+        .step-row { display:flex; gap:1.2rem; padding:1.3rem 0; border-bottom:1px solid var(--border-light); }
+        .step-row:last-child { border-bottom:none; }
+        .step-dot { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.72rem; color:#fff; flex-shrink:0; background:var(--accent); }
+        .step-dot-alt { background:#cbd5e1; }
 
-        footer {
-            background-color: #1e1b4b;
-            border-top: 5px solid #7c3aed;
-        }
+        /* Info box */
+        .info-box { background:var(--bg-alt); border:1px solid var(--border); border-radius:16px; padding:2rem; }
+
+        /* Companies */
+        .company-row { display:flex; align-items:center; gap:1rem; padding:1rem 0; border-bottom:1px solid var(--border-light); }
+        .company-row:last-child { border-bottom:none; }
+        .company-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; background:var(--accent); }
+
+        /* Footer */
+        footer { background:var(--bg-alt); border-top:1px solid var(--border); color:var(--text-muted); padding:3rem 0; }
+        footer strong { color:var(--text-secondary); }
+
+        /* Animations */
+        .fade-up { opacity:0; transform:translateY(25px); transition:all 0.5s ease; }
+        .fade-up.visible { opacity:1; transform:translateY(0); }
     </style>
 </head>
 <body>
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/">[ ML_GAMING ]</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link active" href="/">> INICIO</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/aplicacion1">> VENTAS</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/aplicacion2">> RECOMENDACION</a></li>
-                </ul>
-            </div>
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="/">Machine Learning</a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item"><a class="nav-link active" href="/">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="/use-cases">Use Cases</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Supervised Learning</a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="/linear-regression/concepts">Basic Concepts</a></li>
+                        <li><a class="dropdown-item" href="/linear-regression/application">Application</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Activity 1</a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="/linearRegression/">Linear Regression<br><small>Grade prediction</small></a></li>
+                        <li><a class="dropdown-item" href="/logisticRegression/">Logistic Regression<br><small>Purchase prediction</small></a></li>
+                    </ul>
+                </li>
+            </ul>
         </div>
-    </nav>
+    </div>
+</nav>
 
     <!-- Hero -->
-    <section class="hero-section text-center">
-        <div class="container position-relative" style="z-index: 1;">
-            <p style="color: #fbbf24; font-family: 'Press Start 2P'; font-size: 0.6rem;">- PRESS START -</p>
-            <h1 class="mt-3" style="color: #ffffff;">Machine Learning<br>aplicado a Videojuegos</h1>
-            <p class="mt-4" style="color: #c4b5fd; font-size: 1.4rem;">
-                &gt; Caso de uso: Como los algoritmos de aprendizaje automatico<br>
-                &gt; se utilizan en la industria del gaming
-            </p>
-            <hr style="border-color: #7c3aed; width: 200px; margin: 25px auto; border-width: 3px;">
-            <p style="color: #a5b4fc;">MATERIA: MACHINE LEARNING // UNIVERSIDAD // 2025</p>
+    <section class="hero">
+        <div class="hero-grid"></div>
+        <div class="container position-relative" style="z-index:2;">
+            <div class="row align-items-center">
+                <div class="col-lg-7">
+                    <div class="badge-line">University // 2026</div>
+                    <h1>Machine Learning<br>applied to <span>Video Games</span></h1>
+                    <p class="lead mt-4">How machine learning algorithms are used in the gaming industry to predict, recommend, and optimize.</p>
+                    <div class="d-flex gap-3 mt-4 flex-wrap">
+                        <a href="/use-cases" class="btn-main btn-main-fill">View Use Cases &rarr;</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
     <!-- Que es -->
-    <section class="container my-5">
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
-                <h2 style="color: #5b21b6;">&gt; Que es ML en videojuegos?_</h2>
-                <div class="pixel-border p-4 mt-3" style="background-color: #faf5ff;">
-                    <p>
-                        El machine learning es una rama de la inteligencia artificial donde las
-                        computadoras aprenden patrones a partir de datos sin que uno las programe
-                        directamente para eso. En la industria de los videojuegos esto se ha vuelto
-                        super importante porque se generan cantidades enormes de datos: estadisticas
-                        de jugadores, ventas, comportamiento en el juego, reviews, etc.
-                    </p>
-                    <p>
-                        Empresas como Valve, EA, Riot Games y Nintendo usan machine learning
-                        para mejorar el matchmaking, predecir ventas, detectar trampas
-                        y recomendar juegos a los usuarios.
-                    </p>
-                    <p class="mb-0">
-                        En este trabajo se muestran <span style="color: #e11d48; font-weight: bold;">2 aplicaciones concretas</span>
-                        de machine learning en el mundo gaming usando clasificacion supervisada.
-                    </p>
-                </div>
+    <section class="section">
+        <div class="container"><div class="row"><div class="col-lg-8 mx-auto fade-up">
+            <div class="section-label">Introduction</div>
+            <h2 class="section-title">What is ML in Video Games?</h2>
+            <div class="info-box mt-4">
+                <p>Machine learning is a branch of artificial intelligence where computers learn patterns from data without being explicitly programmed to do so. In the video game industry, this has become extremely important because enormous amounts of data are generated.</p>
+                <p>Companies like Valve, EA, Riot Games, and Nintendo use machine learning to improve matchmaking, predict sales, detect cheating, and recommend games to users.</p>
+                <p class="mb-0">This project showcases <strong style="color:var(--accent);">4 concrete use cases</strong> of machine learning in the gaming world.</p>
             </div>
-        </div>
+        </div></div></div>
     </section>
 
-    <!-- Tipos de aprendizaje -->
-    <section class="bg-soft py-5">
+    <!-- Tipos -->
+    <section class="section section-alt">
         <div class="container">
-            <h2 class="text-center mb-4" style="color: #5b21b6;">&gt; SELECT LEARNING TYPE_</h2>
+            <div class="text-center fade-up">
+                <div class="section-label">Types</div>
+                <h2 class="section-title">Types of Learning</h2>
+                <p class="section-sub">Classification of ML algorithms</p>
+            </div>
             <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="card-retro p-3 h-100" style="border-left: 5px solid #0d9488;">
-                        <h5 style="color: #0d9488;" class="mb-3">[ SUPERVISADO ]</h5>
-                        <p>
-                            El modelo aprende con datos etiquetados. Ejemplo: datos de juegos
-                            donde ya sabemos si vendieron bien o mal.
-                            <span style="color: #e11d48; font-weight: bold;">Es el que usamos en este trabajo.</span>
-                        </p>
+                <div class="col-md-4 fade-up">
+                    <div class="card-clean">
+                        <div class="card-icon" style="background:var(--accent-soft); color:var(--accent);">S</div>
+                        <h5>Supervised</h5>
+                        <p class="mb-2">The model learns from labeled data. Example: game data where we already know if they sold well or poorly.</p>
+                        <span class="tag" style="background:var(--accent-soft); color:var(--accent);">Used in this project</span>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card-retro p-3 h-100" style="border-left: 5px solid #7c3aed;">
-                        <h5 style="color: #7c3aed;" class="mb-3">[ NO SUPERVISADO ]</h5>
-                        <p>
-                            No hay etiquetas. El algoritmo encuentra agrupaciones solo.
-                            En gaming agrupa jugadores por comportamiento
-                            o encuentra comunidades similares.
-                        </p>
+                <div class="col-md-4 fade-up">
+                    <div class="card-clean">
+                        <div class="card-icon" style="background:#f1f5f9; color:#475569;">N</div>
+                        <h5>Unsupervised</h5>
+                        <p class="mb-0">No labels. The algorithm finds groupings on its own. In gaming, it groups players by behavior or finds similar communities.</p>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card-retro p-3 h-100" style="border-left: 5px solid #e11d48;">
-                        <h5 style="color: #e11d48;" class="mb-3">[ POR REFUERZO ]</h5>
-                        <p>
-                            Aprende por prueba y error con recompensas. Muy usado para crear
-                            NPCs inteligentes y bots que aprenden solos
-                            (como el bot de OpenAI en Dota 2).
-                        </p>
+                <div class="col-md-4 fade-up">
+                    <div class="card-clean">
+                        <div class="card-icon" style="background:#fef3c7; color:#d97706;">R</div>
+                        <h5>Reinforcement</h5>
+                        <p class="mb-0">Learns through trial and error with rewards. Widely used to create intelligent NPCs and bots that learn on their own.</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Las 2 aplicaciones -->
-    <section class="container my-5">
-        <h2 class="text-center mb-2" style="color: #5b21b6;">&gt; CHOOSE YOUR APP_</h2>
-        <p class="text-center mb-4" style="color: #999; font-family: 'Press Start 2P'; font-size: 0.45rem;">PLAYER 1 &amp; PLAYER 2</p>
-        <div class="row g-4 justify-content-center">
-            <div class="col-md-5">
-                <div class="pixel-border-teal p-4 h-100" style="background-color: #f0fdfa;">
-                    <p style="color: #fff; background-color: #0d9488; display: inline-block; padding: 4px 12px; font-family: 'Press Start 2P'; font-size: 0.45rem;">PLAYER 1</p>
-                    <h4 class="mt-3" style="color: #0d9488;">Prediccion de Ventas</h4>
-                    <p>
-                        Con un dataset de ventas globales se predice si un juego
-                        va a tener exito comercial basandose en plataforma, genero y publisher.
-                    </p>
-                    <div class="mb-2">
-                        <small style="color: #888;">ALGORITMO:</small><br>
-                        <span style="color: #0d9488; font-weight: bold;">Random Forest</span>
-                    </div>
-                    <div class="mb-3">
-                        <small style="color: #888;">PRECISION:</small>
-                        <div class="stat-bar mt-1">
-                            <div class="stat-bar-fill" style="width: 78%; background-color: #0d9488;"></div>
-                            <span class="stat-bar-label">78%</span>
-                        </div>
-                    </div>
-                    <a href="/aplicacion1" class="btn-pixel btn-teal">&gt; JUGAR</a>
-                </div>
-            </div>
-            <div class="col-md-5">
-                <div class="pixel-border-rose p-4 h-100" style="background-color: #fff1f2;">
-                    <p style="color: #fff; background-color: #e11d48; display: inline-block; padding: 4px 12px; font-family: 'Press Start 2P'; font-size: 0.45rem;">PLAYER 2</p>
-                    <h4 class="mt-3" style="color: #e11d48;">Recomendacion de Juegos</h4>
-                    <p>
-                        Usando datos de jugadores se recomienda generos de juegos
-                        encontrando perfiles de gustos similares.
-                    </p>
-                    <div class="mb-2">
-                        <small style="color: #888;">ALGORITMO:</small><br>
-                        <span style="color: #e11d48; font-weight: bold;">K-Nearest Neighbors</span>
-                    </div>
-                    <div class="mb-3">
-                        <small style="color: #888;">PRECISION:</small>
-                        <div class="stat-bar mt-1">
-                            <div class="stat-bar-fill" style="width: 82%; background-color: #e11d48;"></div>
-                            <span class="stat-bar-label">82%</span>
-                        </div>
-                    </div>
-                    <a href="/aplicacion2" class="btn-pixel btn-rose">&gt; JUGAR</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Tabla comparativa -->
-    <section class="bg-warm py-5">
+    <!-- Casos de uso preview -->
+    <section class="section">
         <div class="container">
-            <h2 class="text-center mb-4" style="color: #5b21b6;">&gt; STATS COMPARISON_</h2>
-            <div class="table-responsive">
-                <table class="table text-center">
-                    <thead>
-                        <tr><th>STAT</th><th>PREDICCION VENTAS</th><th>RECOMENDACION</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>Dataset</td><td>Video Game Sales (16,598 reg)</td><td>Ratings jugadores (5,000 reg)</td></tr>
-                        <tr><td>Problema</td><td>Clasif. binaria (exito/fracaso)</td><td>Clasif. multiclase (genero)</td></tr>
-                        <tr><td>Algoritmo</td><td style="color: #0d9488; font-weight: bold;">Random Forest</td><td style="color: #e11d48; font-weight: bold;">KNN (K=7)</td></tr>
-                        <tr><td>Variables</td><td>5</td><td>6</td></tr>
-                        <tr><td>Accuracy</td><td style="color: #0d9488; font-weight: bold;">78%</td><td style="color: #e11d48; font-weight: bold;">82%</td></tr>
-                        <tr><td>Libreria</td><td>scikit-learn</td><td>scikit-learn</td></tr>
-                    </tbody>
-                </table>
+            <div class="text-center fade-up">
+                <div class="section-label">Use Cases</div>
+                <h2 class="section-title">Industry Applications</h2>
+                <p class="section-sub">4 concrete examples of ML in video games</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-3 fade-up">
+                    <div class="card-clean text-center" style="padding:1.8rem;">
+                        <div class="card-icon mx-auto" style="background:var(--accent-soft); color:var(--accent);">01</div>
+                        <h6>Sales Prediction</h6>
+                        <p class="mb-0" style="font-size:0.88rem;">Random Forest to predict commercial success</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 fade-up">
+                    <div class="card-clean text-center" style="padding:1.8rem;">
+                        <div class="card-icon mx-auto" style="background:#ecfdf5; color:#059669;">02</div>
+                        <h6>Recommendation</h6>
+                        <p class="mb-0" style="font-size:0.88rem;">KNN to recommend game genres</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 fade-up">
+                    <div class="card-clean text-center" style="padding:1.8rem;">
+                        <div class="card-icon mx-auto" style="background:#fef3c7; color:#d97706;">03</div>
+                        <h6>Anti-Cheat</h6>
+                        <p class="mb-0" style="font-size:0.88rem;">Automatic cheater detection</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 fade-up">
+                    <div class="card-clean text-center" style="padding:1.8rem;">
+                        <div class="card-icon mx-auto" style="background:#f1f5f9; color:#475569;">04</div>
+                        <h6>Matchmaking</h6>
+                        <p class="mb-0" style="font-size:0.88rem;">Dynamic difficulty and player matching</p>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-4 fade-up">
+                <a href="/use-cases" class="btn-main btn-main-fill">View all use cases &rarr;</a>
             </div>
         </div>
     </section>
 
     <!-- Proceso -->
-    <section class="container my-5">
-        <h2 class="text-center mb-4" style="color: #5b21b6;">&gt; QUEST LOG: Proceso de ML_</h2>
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
-                <div class="list-group">
-                    <div class="list-group-item" style="border-left: 5px solid #0d9488;">
-                        <span style="color: #0d9488; font-family: 'Press Start 2P'; font-size: 0.45rem;">STEP 01</span><br>
-                        <strong style="color: #5b21b6;">Recoleccion de datos</strong> - Datasets de Kaggle o datos simulados de jugadores.
-                    </div>
-                    <div class="list-group-item" style="border-left: 5px solid #7c3aed;">
-                        <span style="color: #7c3aed; font-family: 'Press Start 2P'; font-size: 0.45rem;">STEP 02</span><br>
-                        <strong style="color: #5b21b6;">Preprocesamiento</strong> - Limpiar datos nulos, codificar variables categoricas.
-                    </div>
-                    <div class="list-group-item" style="border-left: 5px solid #e11d48;">
-                        <span style="color: #e11d48; font-family: 'Press Start 2P'; font-size: 0.45rem;">STEP 03</span><br>
-                        <strong style="color: #5b21b6;">Division del dataset</strong> - 80% entrenamiento, 20% pruebas.
-                    </div>
-                    <div class="list-group-item" style="border-left: 5px solid #f59e0b;">
-                        <span style="color: #f59e0b; font-family: 'Press Start 2P'; font-size: 0.45rem;">STEP 04</span><br>
-                        <strong style="color: #5b21b6;">Entrenamiento</strong> - Se elige el algoritmo y se entrena.
-                    </div>
-                    <div class="list-group-item" style="border-left: 5px solid #0d9488;">
-                        <span style="color: #0d9488; font-family: 'Press Start 2P'; font-size: 0.45rem;">STEP 05</span><br>
-                        <strong style="color: #5b21b6;">Evaluacion</strong> - Accuracy, precision, recall, F1-score, matriz de confusion.
-                    </div>
-                    <div class="list-group-item" style="border-left: 5px solid #7c3aed;">
-                        <span style="color: #7c3aed; font-family: 'Press Start 2P'; font-size: 0.45rem;">STEP 06</span><br>
-                        <strong style="color: #5b21b6;">Prediccion</strong> - El modelo entrenado predice con datos nuevos.
-                    </div>
-                </div>
+    <section class="section">
+        <div class="container"><div class="row"><div class="col-lg-8 mx-auto">
+            <div class="text-center fade-up">
+                <div class="section-label">Process</div>
+                <h2 class="section-title">Machine Learning Process</h2>
+                <p class="section-sub">The 6 steps we follow</p>
             </div>
-        </div>
+            <div class="fade-up">
+                <div class="step-row"><div class="step-dot">01</div><div><strong>Data Collection</strong><p class="mb-0" style="font-size:0.93rem;">Datasets from Kaggle or simulated player data.</p></div></div>
+                <div class="step-row"><div class="step-dot step-dot-alt">02</div><div><strong>Preprocessing</strong><p class="mb-0" style="font-size:0.93rem;">Clean null data, encode categorical variables.</p></div></div>
+                <div class="step-row"><div class="step-dot">03</div><div><strong>Dataset Splitting</strong><p class="mb-0" style="font-size:0.93rem;">80% training, 20% testing.</p></div></div>
+                <div class="step-row"><div class="step-dot step-dot-alt">04</div><div><strong>Training</strong><p class="mb-0" style="font-size:0.93rem;">The algorithm is chosen and trained with the data.</p></div></div>
+                <div class="step-row"><div class="step-dot">05</div><div><strong>Evaluation</strong><p class="mb-0" style="font-size:0.93rem;">Accuracy, precision, recall, F1-score, confusion matrix.</p></div></div>
+                <div class="step-row"><div class="step-dot step-dot-alt">06</div><div><strong>Prediction</strong><p class="mb-0" style="font-size:0.93rem;">The trained model predicts with new data.</p></div></div>
+            </div>
+        </div></div></div>
     </section>
 
-    <!-- Ejemplos reales -->
-    <section class="bg-soft py-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-8 mx-auto">
-                    <h2 class="mb-4" style="color: #5b21b6;">&gt; HIGH SCORES: Empresas reales_</h2>
-                    <div class="pixel-border p-4" style="background-color: #fff;">
-                        <ul style="list-style: none; padding: 0;">
-                            <li class="mb-3"><span style="color: #e11d48;">&#9632;</span> <strong style="color: #5b21b6;">Riot Games (LoL)</strong> - ML para matchmaking, emparejando jugadores de nivel similar</li>
-                            <li class="mb-3"><span style="color: #0d9488;">&#9632;</span> <strong style="color: #5b21b6;">Valve (Steam)</strong> - Sistema de recomendaciones de la tienda con algoritmos de ML</li>
-                            <li class="mb-3"><span style="color: #f59e0b;">&#9632;</span> <strong style="color: #5b21b6;">EA Sports (FC)</strong> - Ajusta dificultad segun como juega el usuario</li>
-                            <li class="mb-0"><span style="color: #7c3aed;">&#9632;</span> <strong style="color: #5b21b6;">Epic Games (Fortnite)</strong> - Detecta cheaters y comportamiento toxico</li>
-                        </ul>
-                    </div>
-                </div>
+    <!-- Empresas -->
+    <section class="section section-alt">
+        <div class="container"><div class="row"><div class="col-lg-8 mx-auto fade-up">
+            <div class="section-label">Industry</div>
+            <h2 class="section-title mb-4">Companies Using ML</h2>
+            <div class="info-box">
+                <div class="company-row"><div class="company-dot"></div><div><strong>Riot Games (LoL)</strong><p class="mb-0" style="font-size:0.93rem;">ML for matchmaking, pairing players of similar skill level</p></div></div>
+                <div class="company-row"><div class="company-dot"></div><div><strong>Valve (Steam)</strong><p class="mb-0" style="font-size:0.93rem;">Store recommendation system using ML algorithms</p></div></div>
+                <div class="company-row"><div class="company-dot"></div><div><strong>EA Sports (FC)</strong><p class="mb-0" style="font-size:0.93rem;">Adjusts difficulty based on how the user plays</p></div></div>
+                <div class="company-row"><div class="company-dot"></div><div><strong>Epic Games (Fortnite)</strong><p class="mb-0" style="font-size:0.93rem;">Detects cheaters and toxic behavior</p></div></div>
             </div>
-        </div>
+        </div></div></div>
     </section>
 
-    <!-- Footer -->
-    <footer class="py-4 mt-5 text-center">
+    <footer class="text-center">
         <div class="container">
-            <p style="font-family: 'Press Start 2P'; font-size: 0.45rem; color: #fbbf24;">
-                GAME OVER? NO, JUST THE BEGINNING
-            </p>
-            <p class="mb-0" style="color: #a5b4fc; font-size: 1rem;">Proyecto Machine Learning - 2025 // Universidad</p>
+            <p class="mb-1"><strong>Machine Learning applied to Video Games</strong></p>
+            <p class="mb-1" style="font-size:0.85rem;">Duvan Lozano Romero &mdash; Systems Engineering</p>
+            <p class="mb-0" style="font-size:0.8rem;">Universidad de Cundinamarca &mdash; Extension Chia &mdash; 2026</p>
         </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const obs = new IntersectionObserver(entries => {
+            entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+        }, {threshold:0.1});
+        document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+        window.addEventListener('scroll', () => {
+            const g = document.querySelector('.hero-grid');
+            if(g) g.style.transform = `perspective(600px) rotateX(55deg) translateY(${window.pageYOffset*0.25}px)`;
+        });
+    </script>
 </body>
 </html>

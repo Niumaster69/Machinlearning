@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linear Regression - Application</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #4f6ef7;
+            --accent-soft: #eef1fe;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --bg: #ffffff;
+            --bg-alt: #f8fafc;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; color:var(--text); background:var(--bg); overflow-x:hidden; }
+        h1,h2,h3,h4,h5 { font-weight:700; letter-spacing:-0.025em; }
+        p { line-height:1.75; color:var(--text-secondary); }
+        code, .code { font-family:'JetBrains Mono',monospace; }
+
+        /* Navbar */
+        .navbar { background:rgba(255,255,255,0.92)!important; backdrop-filter:blur(24px); border-bottom:1px solid var(--border); padding:0.9rem 0; }
+        .navbar-brand { font-weight:800; font-size:1rem; color:var(--text)!important; letter-spacing:-0.04em; }
+        .nav-link { color:var(--text-secondary)!important; font-weight:500; font-size:0.85rem; padding:0.5rem 1rem!important; transition:color 0.2s; }
+        .nav-link:hover,.nav-link.active { color:var(--accent)!important; }
+        .dropdown-menu { background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:0.5rem; min-width:230px; box-shadow:0 12px 32px rgba(0,0,0,0.08); }
+        .dropdown-item { color:var(--text-secondary); border-radius:10px; padding:0.65rem 1rem; font-size:0.85rem; }
+        .dropdown-item:hover { background:var(--accent-soft); color:var(--accent); }
+        .dropdown-item small { color:var(--text-muted); }
+
+        /* Hero */
+        .hero-page { background:linear-gradient(135deg, #eef1fe 0%, #f8fafc 100%); padding:8rem 0 5rem; position:relative; overflow:hidden; }
+        .hero-page::before { content:''; position:absolute; top:-40%; left:-20%; width:500px; height:500px; background:radial-gradient(circle,rgba(79,110,247,0.08),transparent 65%); animation:drift 16s ease-in-out infinite; }
+        @keyframes drift { 0%,100%{transform:translate(0,0)} 50%{transform:translate(20px,-25px)} }
+        .hero-page h1 { font-size:clamp(1.8rem,4vw,2.8rem); color:var(--text); font-weight:800; line-height:1.15; }
+        .hero-page p { color:var(--text-secondary); font-size:1.05rem; }
+        .badge-line { display:inline-block; color:var(--text-muted); font-size:0.75rem; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:1.2rem; border-left:2px solid var(--accent); padding-left:0.75rem; }
+
+        /* Sections */
+        .section { padding:5rem 0; }
+        .section-alt { background:var(--bg-alt); }
+        .section-label { text-transform:uppercase; font-weight:600; font-size:0.75rem; letter-spacing:0.12em; color:var(--accent); margin-bottom:0.6rem; }
+
+        /* Info box */
+        .info-box { background:var(--bg-alt); border:1px solid var(--border); border-radius:16px; padding:2rem; }
+        .info-box-white { background:var(--bg); border:1px solid var(--border); border-radius:16px; padding:2rem; }
+
+        /* Variable cards */
+        .var-card { background:var(--bg); border:1px solid var(--border); border-radius:16px; padding:2rem; text-align:center; height:100%; transition:transform 0.2s, box-shadow 0.2s; }
+        .var-card:hover { transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,0.06); }
+        .var-card .var-label { text-transform:uppercase; font-size:0.7rem; font-weight:600; letter-spacing:0.1em; color:var(--accent); margin-bottom:0.5rem; }
+        .var-card .var-name { font-size:1.15rem; font-weight:700; color:var(--text); margin-bottom:0.4rem; }
+        .var-card .var-desc { font-size:0.88rem; color:var(--text-secondary); margin-bottom:0; }
+        .var-icon { width:56px; height:56px; border-radius:14px; background:var(--accent-soft); display:flex; align-items:center; justify-content:center; margin:0 auto 1rem; font-size:1.5rem; }
+
+        /* Steps */
+        .step-item { display:flex; gap:1.25rem; margin-bottom:1.75rem; }
+        .step-number { width:40px; height:40px; min-width:40px; border-radius:12px; background:var(--accent); color:#fff; font-weight:700; font-size:0.9rem; display:flex; align-items:center; justify-content:center; }
+        .step-content h5 { font-size:1rem; font-weight:600; margin-bottom:0.25rem; }
+        .step-content p { font-size:0.9rem; margin-bottom:0; }
+
+        /* Dataset table */
+        .dataset-table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+        .dataset-table th { background:var(--accent); color:#fff; padding:0.65rem 1rem; font-weight:600; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.05em; }
+        .dataset-table th:first-child { border-radius:10px 0 0 0; }
+        .dataset-table th:last-child { border-radius:0 10px 0 0; }
+        .dataset-table td { padding:0.6rem 1rem; border-bottom:1px solid var(--border-light); color:var(--text-secondary); font-family:'JetBrains Mono',monospace; font-size:0.8rem; }
+        .dataset-table tr:last-child td { border-bottom:none; }
+        .dataset-table tr:hover td { background:var(--accent-soft); }
+
+        /* Graph container */
+        .graph-container { background:var(--bg); border:1px solid var(--border); border-radius:16px; padding:1.5rem; text-align:center; }
+        .graph-container img { max-width:100%; height:auto; border-radius:12px; }
+
+        /* Code block */
+        .code-block { background:#1e293b; color:#e2e8f0; border-radius:12px; padding:1.25rem 1.5rem; font-family:'JetBrains Mono',monospace; font-size:0.82rem; line-height:1.7; overflow-x:auto; }
+        .code-block .keyword { color:#93c5fd; }
+        .code-block .string { color:#86efac; }
+        .code-block .comment { color:#64748b; }
+
+        /* Form */
+        .form-card { background:var(--bg); border:1px solid var(--border); border-radius:20px; padding:2.5rem; box-shadow:0 4px 20px rgba(0,0,0,0.04); max-width:480px; margin:0 auto; }
+        .form-label { font-weight:600; font-size:0.88rem; color:var(--text); }
+        .form-control { border:1.5px solid var(--border); border-radius:12px; padding:0.75rem 1rem; font-size:1rem; transition:border-color 0.2s; }
+        .form-control:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(79,110,247,0.1); }
+        .btn-submit { background:var(--accent); color:#fff; border:none; border-radius:12px; padding:0.75rem 2rem; font-weight:600; font-size:0.93rem; width:100%; cursor:pointer; transition:all 0.2s; }
+        .btn-submit:hover { background:#3d5ce5; transform:translateY(-1px); }
+
+        /* Result */
+        .result-box { background:var(--accent-soft); border:1px solid var(--accent); border-radius:16px; padding:1.5rem; text-align:center; margin-top:1.5rem; }
+        .result-value { font-size:2.2rem; font-weight:800; color:var(--accent); }
+
+        /* Footer */
+        .btn-back { display:inline-flex; align-items:center; gap:0.5rem; color:var(--accent); text-decoration:none; font-weight:600; font-size:0.88rem; }
+        .btn-back:hover { opacity:0.7; color:var(--accent); }
+        footer { background:var(--bg-alt); border-top:1px solid var(--border); color:var(--text-muted); padding:3rem 0; }
+
+        /* Animation */
+        .fade-up { opacity:0; transform:translateY(25px); transition:all 0.5s ease; }
+        .fade-up.visible { opacity:1; transform:translateY(0); }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">Machine Learning</a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/use-cases">Use Cases</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">Supervised Learning</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/linear-regression/concepts">Basic Concepts</a></li>
+                            <li><a class="dropdown-item" href="/linear-regression/application" style="background:var(--accent-soft);">Application</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Activity 1</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/linearRegression/">Linear Regression<br><small>Grade prediction</small></a></li>
+                            <li><a class="dropdown-item" href="/logisticRegression/">Logistic Regression<br><small>Purchase prediction</small></a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero-page">
+        <div class="container position-relative" style="z-index:2;">
+            <div class="badge-line">Supervised Learning &mdash; Application</div>
+            <h1>Predicting Gaming Hours<br>with Linear Regression</h1>
+            <p class="mt-3" style="max-width:520px;">Using the Steam User Behavior Dataset to predict total play time based on a user's game library size.</p>
+        </div>
+    </section>
+
+    <!-- Problem Description -->
+    <section class="section">
+        <div class="container fade-up">
+            <div class="section-label">Problem Statement</div>
+            <h2 style="font-size:1.6rem; margin-bottom:1rem;">Can we predict how many hours a user will play?</h2>
+            <div class="row g-4 mt-1">
+                <div class="col-lg-7">
+                    <p>Steam is the world's largest digital distribution platform for PC gaming, with millions of active users and thousands of available titles. Every day, users purchase games and accumulate hours of playtime across their libraries.</p>
+                    <p>Understanding gaming behavior patterns is valuable for game developers, platform designers, and recommendation systems. One key question is: <strong>can we predict a user's total play time based on the number of games they own?</strong></p>
+                    <p class="mb-0">We apply <strong>simple linear regression</strong> to model this relationship, using real-world data from the Steam platform.</p>
+                </div>
+                <div class="col-lg-5">
+                    <div class="info-box" style="border-left:3px solid var(--accent);">
+                        <h5 style="font-size:0.95rem;">Why does this matter?</h5>
+                        <p style="font-size:0.88rem;" class="mb-0">Predicting user engagement helps platforms personalize recommendations, optimize server resources, and identify high-value users. Linear regression gives us a simple yet interpretable baseline model for this task.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dataset Explanation -->
+    <section class="section section-alt">
+        <div class="container fade-up">
+            <div class="section-label">Dataset</div>
+            <h2 style="font-size:1.6rem; margin-bottom:1rem;">Steam User Behavior Dataset</h2>
+            <div class="row g-4 mt-1">
+                <div class="col-lg-6">
+                    <p>The dataset contains <strong>200,000 rows</strong> of user-game interactions collected from the Steam platform. Each row represents a specific relationship between a user and a game.</p>
+                    <p>There are two types of records:</p>
+                    <ul style="color:var(--text-secondary); line-height:2;">
+                        <li><strong>Purchase</strong> &mdash; indicates the user owns the game</li>
+                        <li><strong>Play</strong> &mdash; indicates play time logged for that game</li>
+                    </ul>
+                    <p class="mb-0">By aggregating these records at the user level, we can derive features like total games owned and total hours played.</p>
+                </div>
+                <div class="col-lg-6">
+                    <div class="info-box-white">
+                        <h5 style="font-size:0.9rem; margin-bottom:1rem;">Dataset Preview</h5>
+                        <div style="overflow-x:auto;">
+                            <table class="dataset-table">
+                                <thead>
+                                    <tr>
+                                        <th>User ID</th>
+                                        <th>Game</th>
+                                        <th>Action</th>
+                                        <th>Hours</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>15120</td><td>Skyrim</td><td>purchase</td><td>1.0</td></tr>
+                                    <tr><td>15120</td><td>Skyrim</td><td>play</td><td>273.0</td></tr>
+                                    <tr><td>15120</td><td>Fallout 4</td><td>purchase</td><td>1.0</td></tr>
+                                    <tr><td>15120</td><td>Fallout 4</td><td>play</td><td>87.0</td></tr>
+                                    <tr><td>24990</td><td>Dota 2</td><td>purchase</td><td>1.0</td></tr>
+                                    <tr><td>24990</td><td>Dota 2</td><td>play</td><td>1,203.0</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Variables Used -->
+    <section class="section">
+        <div class="container fade-up">
+            <div class="section-label">Variables</div>
+            <h2 style="font-size:1.6rem; margin-bottom:2rem;">Variables Used in the Model</h2>
+            <div class="row g-4 justify-content-center">
+                <div class="col-md-5">
+                    <div class="var-card">
+                        <div class="var-icon">X</div>
+                        <div class="var-label">Independent Variable</div>
+                        <div class="var-name">Number of Games Owned</div>
+                        <p class="var-desc">Total count of unique games purchased by the user on Steam.</p>
+                    </div>
+                </div>
+                <div class="col-md-2 d-flex align-items-center justify-content-center">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </div>
+                <div class="col-md-5">
+                    <div class="var-card">
+                        <div class="var-icon">Y</div>
+                        <div class="var-label">Dependent Variable</div>
+                        <div class="var-name">Total Hours Played</div>
+                        <p class="var-desc">Sum of all play hours logged by the user across every game in their library.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Data Preparation -->
+    <section class="section section-alt">
+        <div class="container fade-up">
+            <div class="section-label">Methodology</div>
+            <h2 style="font-size:1.6rem; margin-bottom:2rem;">Data Preparation Steps</h2>
+            <div style="max-width:640px;">
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h5>Filter Purchase Records</h5>
+                        <p>Select only rows where the action is "purchase" and count the number of unique games per user.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h5>Filter Play Records</h5>
+                        <p>Select only rows where the action is "play" and sum the total hours played per user.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h5>Merge into User-Level Dataset</h5>
+                        <p>Join the two aggregated tables on User ID, creating one row per user with games owned and total hours.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h5>Train/Test Split (80/20)</h5>
+                        <p>Split the dataset into 80% training data and 20% testing data to evaluate model performance.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Regression Graph -->
+    <section class="section">
+        <div class="container fade-up">
+            <div class="section-label">Visualization</div>
+            <h2 style="font-size:1.6rem; margin-bottom:1.5rem;">Regression Graph</h2>
+            <div class="graph-container" style="max-width:720px; margin:0 auto;">
+                <img src="{{ url_for('static', filename='regression_plot.png') }}" alt="Linear Regression: Games Owned vs Hours Played">
+            </div>
+            <div class="info-box mt-4" style="max-width:720px; margin:1.5rem auto 0;">
+                <p style="font-size:0.9rem;" class="mb-0">The scatter plot shows individual users as data points, with the number of games owned on the X-axis and total hours played on the Y-axis. The red regression line represents the model's best fit &mdash; it captures the general trend that users who own more games tend to accumulate more play hours.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interpretation of Results -->
+    <section class="section section-alt">
+        <div class="container fade-up">
+            <div class="section-label">Results</div>
+            <h2 style="font-size:1.6rem; margin-bottom:1.5rem;">Interpretation of Results</h2>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="info-box-white" style="border-left:3px solid var(--accent);">
+                        <h5 style="font-size:0.95rem; margin-bottom:1rem;">Model Equation</h5>
+                        <div class="code-block" style="text-align:center; font-size:1rem;">
+                            Hours = <span class="keyword">{{ slope }}</span> &times; Games + <span class="string">{{ intercept }}</span>
+                        </div>
+                        <div class="mt-3">
+                            <table style="width:100%; font-size:0.88rem;">
+                                <tr style="border-bottom:1px solid var(--border-light);">
+                                    <td style="padding:0.6rem 0; font-weight:600; color:var(--text);">Slope (m)</td>
+                                    <td style="padding:0.6rem 0; text-align:right; font-family:'JetBrains Mono',monospace; color:var(--accent);">{{ slope }}</td>
+                                </tr>
+                                <tr style="border-bottom:1px solid var(--border-light);">
+                                    <td style="padding:0.6rem 0; font-weight:600; color:var(--text);">Intercept (b)</td>
+                                    <td style="padding:0.6rem 0; text-align:right; font-family:'JetBrains Mono',monospace; color:var(--accent);">{{ intercept }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:0.6rem 0; font-weight:600; color:var(--text);">R&sup2; Score</td>
+                                    <td style="padding:0.6rem 0; text-align:right; font-family:'JetBrains Mono',monospace; color:var(--accent);">{{ r2_score }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="info-box">
+                        <h5 style="font-size:0.95rem; margin-bottom:0.75rem;">What do these numbers mean?</h5>
+                        <p style="font-size:0.88rem;"><strong>Slope:</strong> For each additional game a user owns, the model predicts an increase of <strong>{{ slope }}</strong> hours in total play time.</p>
+                        <p style="font-size:0.88rem;"><strong>Intercept:</strong> A user with zero games would have an estimated base play time of <strong>{{ intercept }}</strong> hours (theoretical baseline).</p>
+                        <p style="font-size:0.88rem;" class="mb-0"><strong>R&sup2; Score:</strong> The coefficient of determination indicates how well the model explains the variance in the data. A value of <strong>{{ r2_score }}</strong> means the model captures that proportion of the variability in hours played based on games owned.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Prediction Form -->
+    <section class="section">
+        <div class="container fade-up">
+            <div class="section-label">Try It Out</div>
+            <h2 style="font-size:1.6rem; margin-bottom:1.5rem; text-align:center;">Make a Prediction</h2>
+            <div class="form-card">
+                <h5 class="mb-1">Predict Play Time</h5>
+                <p class="mb-4" style="font-size:0.88rem;">Enter the number of games in a user's library to estimate their total hours played.</p>
+                <form method="post" action="/linear-regression/application#result">
+                    <div class="mb-3">
+                        <label for="games" class="form-label">Number of games in library</label>
+                        <input type="number" step="1" min="0" class="form-control" id="games" name="games_owned" placeholder="e.g. 25" required>
+                    </div>
+                    <button type="submit" class="btn-submit">Predict Hours</button>
+                </form>
+                {% if result is not none %}
+                <div class="result-box" id="result">
+                    <p class="mb-1" style="font-size:0.78rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.08em; font-weight:600;">Predicted Hours</p>
+                    <div class="result-value">{{ result }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center">
+        <div class="container">
+            <a href="/" class="btn-back">&larr; Back to Home</a>
+            <p class="mt-3 mb-1" style="font-size:0.85rem;">Duvan Lozano Romero &mdash; Systems Engineering</p>
+            <p class="mb-0" style="font-size:0.8rem;">Universidad de Cundinamarca &mdash; Extension Chia &mdash; 2026</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const obs = new IntersectionObserver(entries => { entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }); }, {threshold:0.1});
+        document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+    </script>
+</body>
+</html>

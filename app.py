@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request
 import LinearRegrression
 import LogisticRegressionModel
+import SteamLinearRegression
+
 app = Flask(__name__)
 #py -m flask run
 
@@ -8,22 +10,35 @@ app = Flask(__name__)
 def home():
     return render_template('index.html')
 
-@app.route('/aplicacion1')
-def aplicacion1():
-    return render_template('ventas.html')
+@app.route('/use-cases')
+def use_cases():
+    return render_template('casos_de_uso.html')
 
-@app.route('/aplicacion2')
-def aplicacion2():
-    return render_template('recomendacion.html')
+@app.route('/linear-regression/concepts')
+def lr_concepts():
+    return render_template('basic_concepts.html')
 
-@app.route('/linearRegression/',methods=["GET", "POST"])
+@app.route('/linear-regression/application', methods=["GET", "POST"])
+def lr_application():
+    result = None
+    if request.method == "POST":
+        games = float(request.form["games_owned"])
+        result = round(SteamLinearRegression.predict_hours(games), 2)
+    return render_template(
+        "application.html",
+        result=result,
+        slope=round(SteamLinearRegression.slope, 4),
+        intercept=round(SteamLinearRegression.intercept, 2),
+        r2_score=round(SteamLinearRegression.r2, 4)
+    )
+
+@app.route('/linearRegression/', methods=["GET", "POST"])
 def calculateGrade():
     calculateResult = None
     if request.method == "POST":
         hours = float(request.form["hours"])
         calculateResult = LinearRegrression.calculate_grade(hours)
-        return render_template("linearRegressionGrade2.html", result = calculateResult)
-    return render_template("linearRegressionGrade2.html", result = calculateResult)
+    return render_template("linearRegressionGrade2.html", result=calculateResult)
 
 @app.route('/logisticRegression/', methods=["GET", "POST"])
 def logisticRegression():
@@ -37,5 +52,4 @@ def logisticRegression():
         descuento_usado = float(request.form["descuento_usado"])
         input_scaled = LogisticRegressionModel.scaler.transform([[edad, ingreso_mensual, visitas_web_mes, tiempo_sitio_min, compras_previas, descuento_usado]])
         calculateResult = LogisticRegressionModel.logistic_model.predict(input_scaled)[0]
-        return render_template("logisticRegression.html", result=calculateResult)
     return render_template("logisticRegression.html", result=calculateResult)
