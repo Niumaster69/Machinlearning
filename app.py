@@ -12,7 +12,7 @@ def home():
 
 @app.route('/use-cases')
 def use_cases():
-    return render_template('casos_de_uso.html')
+    return render_template('use_cases.html')
 
 @app.route('/linear-regression/concepts')
 def lr_concepts():
