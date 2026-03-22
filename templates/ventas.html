@@ -3,382 +3,264 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prediccion de Ventas - ML Gaming</title>
+    <title>Prediccion de Ventas - Machine Learning</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        * { border-radius: 0 !important; }
-        body {
-            background-color: #ffffff;
-            color: #2d2d2d;
-            font-family: 'VT323', monospace;
-            font-size: 1.25rem;
+        :root {
+            --accent: #4f6ef7;
+            --accent-soft: #eef1fe;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --bg: #ffffff;
+            --bg-alt: #f8fafc;
         }
-        h1, h2, h3, h4, h5, h6, .navbar-brand { font-family: 'Press Start 2P', cursive; }
-        h1 { font-size: 1.3rem; line-height: 2.2; }
-        h2 { font-size: 1rem; line-height: 2; }
-        h4 { font-size: 0.8rem; line-height: 1.8; }
-        h5 { font-size: 0.7rem; line-height: 1.8; }
-        p, li, td, th { font-family: 'VT323', monospace; font-size: 1.3rem; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; color:var(--text); background:var(--bg); overflow-x:hidden; }
+        h1,h2,h3,h4,h5,h6 { font-weight:700; letter-spacing:-0.025em; }
+        p { line-height:1.75; color:var(--text-secondary); }
 
-        .pixel-border {
-            border: 4px solid #0d9488;
-            box-shadow: 4px 4px 0px #0d9488;
-        }
-        .navbar { background-color: #1e1b4b !important; border-bottom: 5px solid #7c3aed; }
-        .navbar-brand { font-size: 0.7rem; color: #fbbf24 !important; }
-        .nav-link { font-family: 'Press Start 2P', cursive; font-size: 0.5rem; color: #e0e7ff !important; padding: 8px 14px !important; }
-        .nav-link:hover { color: #fbbf24 !important; }
-        .nav-link.active { color: #fbbf24 !important; background-color: rgba(251,191,36,0.1); }
+        .navbar { background:rgba(255,255,255,0.92)!important; backdrop-filter:blur(24px); border-bottom:1px solid var(--border); padding:0.9rem 0; }
+        .navbar-brand { font-weight:800; font-size:1rem; color:var(--text)!important; letter-spacing:-0.04em; }
+        .nav-link { color:var(--text-secondary)!important; font-weight:500; font-size:0.85rem; padding:0.5rem 1rem!important; transition:color 0.2s; }
+        .nav-link:hover,.nav-link.active { color:var(--accent)!important; }
+        .dropdown-menu { background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:0.5rem; min-width:230px; box-shadow:0 12px 32px rgba(0,0,0,0.08); }
+        .dropdown-item { color:var(--text-secondary); border-radius:10px; padding:0.65rem 1rem; font-size:0.85rem; }
+        .dropdown-item:hover { background:var(--accent-soft); color:var(--accent); }
+        .dropdown-item small { color:var(--text-muted); }
 
-        .header-app {
-            background-color: #1e1b4b;
-            padding: 55px 0;
-            border-bottom: 5px solid #0d9488;
-            position: relative; overflow: hidden;
-        }
-        .header-app::after {
-            content: '';
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,0.03) 3px, rgba(255,255,255,0.03) 6px);
-            pointer-events: none;
-        }
+        .hero-page { background:linear-gradient(135deg, #eef1fe 0%, #f8fafc 100%); padding:8rem 0 5rem; position:relative; overflow:hidden; }
+        .hero-page::before { content:''; position:absolute; top:-40%; right:-15%; width:500px; height:500px; background:radial-gradient(circle,rgba(79,110,247,0.08),transparent 65%); animation:drift 16s ease-in-out infinite; }
+        @keyframes drift { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-20px,-15px)} }
+        .hero-page h1 { font-size:clamp(1.8rem,4vw,2.8rem); color:var(--text); font-weight:800; line-height:1.15; }
+        .hero-page p { color:var(--text-secondary); font-size:1.05rem; }
+        .badge-line { display:inline-block; color:var(--text-muted); font-size:0.75rem; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:1.2rem; border-left:2px solid var(--accent); padding-left:0.75rem; }
 
-        .card-retro {
-            background-color: #fafafa;
-            border: 3px solid #e5e7eb;
-            color: #2d2d2d;
-        }
-        .variable-card {
-            background-color: #f0fdfa;
-            border: 2px solid #ccfbf1;
-            border-left: 5px solid #0d9488;
-        }
-        .bg-soft { background-color: #f0fdfa; border-top: 3px solid #ccfbf1; border-bottom: 3px solid #ccfbf1; }
-        .bg-warm { background-color: #f5f3ff; border-top: 3px solid #e9e5ff; border-bottom: 3px solid #e9e5ff; }
+        .section { padding:5rem 0; }
+        .section-alt { background:var(--bg-alt); }
+        .section-label { text-transform:uppercase; font-weight:600; font-size:0.75rem; letter-spacing:0.12em; color:var(--accent); margin-bottom:0.6rem; }
+        .section-title { font-size:1.5rem; margin-bottom:0.5rem; }
+
+        .info-box { background:var(--bg-alt); border:1px solid var(--border); border-radius:16px; padding:2rem; }
+        .card-clean { background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:1.5rem; height:100%; transition:all 0.25s; }
+        .card-clean:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.05); }
 
         .code-block {
-            background-color: #1e1b4b;
-            color: #e0e7ff;
-            padding: 22px;
-            font-family: 'VT323', monospace;
-            font-size: 1.2rem;
-            overflow-x: auto;
-            border: 4px solid #7c3aed;
-            box-shadow: 6px 6px 0px #5b21b6;
+            background:#1e293b; color:#e2e8f0; padding:1.5rem; border-radius:14px;
+            font-family:'JetBrains Mono',monospace; font-size:0.82rem; line-height:1.8; overflow-x:auto;
+            border:1px solid #334155;
         }
-        .code-block .comment { color: #a5b4fc; }
-        .code-block .keyword { color: #67e8f9; }
-        .code-block .string { color: #fbbf24; }
-        .code-block .function { color: #f0abfc; }
+        .code-block .comment { color:#64748b; } .code-block .keyword { color:#818cf8; }
+        .code-block .string { color:#5eead4; } .code-block .function { color:#c4b5fd; }
 
-        .table { border-collapse: separate; border-spacing: 3px; }
-        .table th {
-            background-color: #0d9488; color: #fff;
-            font-family: 'Press Start 2P', cursive; font-size: 0.5rem; padding: 12px 8px;
-        }
-        .table td { background-color: #fafafa; color: #2d2d2d; border: 2px solid #e5e7eb; padding: 10px 8px; }
+        .table-clean { width:100%; border-collapse:collapse; }
+        .table-clean th { background:var(--accent-soft); color:var(--accent); font-weight:600; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.06em; padding:0.9rem 1rem; text-align:left; }
+        .table-clean td { padding:0.8rem 1rem; border-bottom:1px solid var(--border-light); font-size:0.93rem; color:var(--text-secondary); }
 
-        .stat-bar { background-color: #e5e7eb; height: 22px; position: relative; border: 2px solid #d1d5db; }
-        .stat-bar-fill { height: 100%; }
-        .stat-bar-label {
-            position: absolute; top: 0; left: 8px;
-            font-family: 'Press Start 2P', cursive; font-size: 0.4rem;
-            line-height: 22px; color: #fff; text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
-        }
+        .progress-bar-custom { height:6px; background:var(--border-light); border-radius:50px; overflow:hidden; margin-top:0.5rem; }
+        .progress-fill { height:100%; border-radius:50px; }
+        .bar-item { margin-bottom:1rem; }
+        .bar-label { font-weight:600; font-size:0.88rem; }
+        .bar-value { font-size:0.78rem; color:var(--text-muted); }
 
-        footer { background-color: #1e1b4b; border-top: 5px solid #7c3aed; }
+        .btn-back { display:inline-flex; align-items:center; gap:0.5rem; color:var(--accent); text-decoration:none; font-weight:600; font-size:0.88rem; transition:opacity 0.2s; }
+        .btn-back:hover { opacity:0.7; color:var(--accent); }
+        footer { background:var(--bg-alt); border-top:1px solid var(--border); color:var(--text-muted); padding:3rem 0; }
+
+        .fade-up { opacity:0; transform:translateY(25px); transition:all 0.5s ease; }
+        .fade-up.visible { opacity:1; transform:translateY(0); }
     </style>
 </head>
 <body>
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
+    <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="/">[ ML_GAMING ]</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            <a class="navbar-brand" href="/">Machine Learning</a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="/">> INICIO</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="/aplicacion1">> VENTAS</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/aplicacion2">> RECOMENDACION</a></li>
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="/">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/aplicacion1">Ventas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/aplicacion2">Recomendacion</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Actividad 1</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/linearRegression/">Regresion Lineal<br><small>Prediccion de notas</small></a></li>
+                            <li><a class="dropdown-item" href="/logisticRegression/">Regresion Logistica<br><small>Prediccion de compra</small></a></li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Header -->
-    <section class="header-app text-center">
-        <div class="container position-relative" style="z-index:1;">
-            <p style="color: #2dd4bf; font-family: 'Press Start 2P'; font-size: 0.55rem;">PLAYER 1 - STAGE 1</p>
-            <h1 class="mt-3" style="color: #ffffff;">Prediccion de Ventas<br>de Videojuegos</h1>
-            <p class="mt-3" style="color: #a5b4fc; font-size: 1.3rem;">Modelo Random Forest para predecir el exito comercial de un videojuego</p>
+    <section class="hero-page">
+        <div class="container position-relative" style="z-index:2;">
+            <div class="badge-line">Aplicacion 1</div>
+            <h1>Prediccion de Ventas<br>de Videojuegos</h1>
+            <p class="mt-3" style="max-width:480px;">Modelo Random Forest para predecir el exito comercial de un videojuego</p>
         </div>
     </section>
 
-    <!-- Descripcion -->
-    <section class="container my-5">
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
-                <h2 style="color: #0d9488;">&gt; Descripcion del problema_</h2>
-                <div class="pixel-border p-4 mt-3" style="background-color: #f0fdfa;">
-                    <p>
-                        La industria de los videojuegos mueve miles de millones de dolares al año.
-                        Para las empresas es clave predecir si un juego va a vender bien
-                        antes de invertir millones en marketing.
-                    </p>
-                    <p>
-                        Usamos el dataset <span style="color: #e11d48; font-weight: bold;">Video Game Sales</span> de Kaggle
-                        con info de mas de 16,000 videojuegos. Se clasifica como "exito" si vende
-                        mas de 1 millon de copias, "fracaso" si no.
-                    </p>
-                    <p class="mb-0">
-                        Es un umbral arbitrario pero funciona bien para clasificacion binaria.
-                    </p>
-                </div>
+    <section class="section">
+        <div class="container"><div class="row"><div class="col-lg-8 mx-auto fade-up">
+            <div class="section-label">Contexto</div>
+            <h2 class="section-title">Descripcion del problema</h2>
+            <div class="info-box mt-4">
+                <p>La industria de los videojuegos mueve miles de millones de dolares al año. Para las empresas es clave predecir si un juego va a vender bien antes de invertir millones en marketing.</p>
+                <p>Usamos el dataset <strong>Video Game Sales</strong> de Kaggle con info de mas de 16,000 videojuegos. Se clasifica como "exito" si vende mas de 1 millon de copias, "fracaso" si no.</p>
+                <p class="mb-0">Es un umbral arbitrario pero funciona bien para clasificacion binaria.</p>
             </div>
-        </div>
+        </div></div></div>
     </section>
 
-    <!-- Variables -->
-    <section class="bg-soft py-5">
+    <section class="section section-alt">
         <div class="container">
-            <h2 class="text-center mb-4" style="color: #0d9488;">&gt; INVENTORY: Variables_</h2>
+            <div class="text-center fade-up">
+                <div class="section-label">Dataset</div>
+                <h2 class="section-title mb-4">Variables del modelo</h2>
+            </div>
             <div class="row g-3">
-                <div class="col-md-6 col-lg-4">
-                    <div class="variable-card p-3 h-100">
-                        <h5 style="color: #0d9488;">Platform</h5>
-                        <p class="mb-0">Plataforma (PS4, Xbox, PC, Nintendo, etc)</p>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="variable-card p-3 h-100">
-                        <h5 style="color: #0d9488;">Genre</h5>
-                        <p class="mb-0">Genero (Action, Sports, RPG, Shooter...)</p>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="variable-card p-3 h-100">
-                        <h5 style="color: #0d9488;">Publisher</h5>
-                        <p class="mb-0">Empresa (Nintendo, EA, Activision...)</p>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="variable-card p-3 h-100">
-                        <h5 style="color: #0d9488;">Year</h5>
-                        <p class="mb-0">Año de lanzamiento</p>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="variable-card p-3 h-100">
-                        <h5 style="color: #0d9488;">NA_Sales</h5>
-                        <p class="mb-0">Ventas en Norteamerica (millones)</p>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="variable-card p-3 h-100">
-                        <h5 style="color: #0d9488;">EU_Sales</h5>
-                        <p class="mb-0">Ventas en Europa (millones)</p>
-                    </div>
-                </div>
+                <div class="col-md-4 fade-up"><div class="card-clean" style="border-left:3px solid var(--accent);"><h6 style="color:var(--accent);">Platform</h6><p class="mb-0" style="font-size:0.9rem;">Plataforma (PS4, Xbox, PC, Nintendo, etc)</p></div></div>
+                <div class="col-md-4 fade-up"><div class="card-clean" style="border-left:3px solid var(--accent);"><h6 style="color:var(--accent);">Genre</h6><p class="mb-0" style="font-size:0.9rem;">Genero (Action, Sports, RPG, Shooter...)</p></div></div>
+                <div class="col-md-4 fade-up"><div class="card-clean" style="border-left:3px solid var(--accent);"><h6 style="color:var(--accent);">Publisher</h6><p class="mb-0" style="font-size:0.9rem;">Empresa (Nintendo, EA, Activision...)</p></div></div>
+                <div class="col-md-4 fade-up"><div class="card-clean" style="border-left:3px solid var(--accent);"><h6 style="color:var(--accent);">Year</h6><p class="mb-0" style="font-size:0.9rem;">Año de lanzamiento</p></div></div>
+                <div class="col-md-4 fade-up"><div class="card-clean" style="border-left:3px solid var(--accent);"><h6 style="color:var(--accent);">NA_Sales</h6><p class="mb-0" style="font-size:0.9rem;">Ventas en Norteamerica (millones)</p></div></div>
+                <div class="col-md-4 fade-up"><div class="card-clean" style="border-left:3px solid var(--accent);"><h6 style="color:var(--accent);">EU_Sales</h6><p class="mb-0" style="font-size:0.9rem;">Ventas en Europa (millones)</p></div></div>
             </div>
         </div>
     </section>
 
-    <!-- Algoritmo -->
-    <section class="container my-5">
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
-                <h2 style="color: #5b21b6;">&gt; WEAPON: Random Forest_</h2>
-                <div class="card-retro p-4 mt-3" style="border-left: 5px solid #7c3aed;">
-                    <p>
-                        Random Forest crea muchos arboles de decision al mismo tiempo y combina
-                        sus predicciones. Cada arbol "vota" y la clase con mas votos gana.
-                    </p>
-                    <p style="color: #5b21b6; font-weight: bold;">Por que se eligio?</p>
-                    <ul>
-                        <li>Funciona bien con variables categoricas como plataforma o genero</li>
-                        <li>Es robusto contra el overfitting</li>
-                        <li>Maneja bien datasets grandes (16 mil registros)</li>
-                        <li>Dice cuales variables son mas importantes</li>
-                    </ul>
-                    <p style="color: #5b21b6; font-weight: bold;">Como funciona:</p>
-                    <ol>
-                        <li>Se toman muestras aleatorias del dataset (con reemplazo)</li>
-                        <li>Se construye un arbol de decision para cada muestra</li>
-                        <li>Cada arbol usa solo algunas variables aleatorias</li>
-                        <li>Para predecir, todos los arboles votan y gana la mayoria</li>
-                    </ol>
-                </div>
+    <section class="section">
+        <div class="container"><div class="row"><div class="col-lg-8 mx-auto fade-up">
+            <div class="section-label">Algoritmo</div>
+            <h2 class="section-title">Random Forest</h2>
+            <div class="info-box mt-4" style="border-left:3px solid var(--accent);">
+                <p>Random Forest crea muchos arboles de decision al mismo tiempo y combina sus predicciones. Cada arbol "vota" y la clase con mas votos gana.</p>
+                <h6 class="mt-3">Por que se eligio?</h6>
+                <ul><li>Funciona bien con variables categoricas como plataforma o genero</li><li>Es robusto contra el overfitting</li><li>Maneja bien datasets grandes (16 mil registros)</li><li>Dice cuales variables son mas importantes</li></ul>
+                <h6 class="mt-3">Como funciona:</h6>
+                <ol><li>Se toman muestras aleatorias del dataset (con reemplazo)</li><li>Se construye un arbol de decision para cada muestra</li><li>Cada arbol usa solo algunas variables aleatorias</li><li>Para predecir, todos los arboles votan y gana la mayoria</li></ol>
             </div>
-        </div>
+        </div></div></div>
     </section>
 
-    <!-- Codigo -->
-    <section class="bg-warm py-5">
+    <section class="section section-alt">
         <div class="container">
-            <h2 class="text-center mb-4" style="color: #5b21b6;">&gt; SOURCE CODE_</h2>
-            <div class="row">
-                <div class="col-lg-10 mx-auto">
-                    <div class="code-block">
-<span class="comment"># Importar librerias</span><br>
-<span class="keyword">import</span> pandas <span class="keyword">as</span> pd<br>
-<span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split<br>
-<span class="keyword">from</span> sklearn.ensemble <span class="keyword">import</span> RandomForestClassifier<br>
-<span class="keyword">from</span> sklearn.preprocessing <span class="keyword">import</span> LabelEncoder<br>
-<span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> accuracy_score, classification_report<br>
-<br>
-<span class="comment"># Cargar el dataset</span><br>
-df = pd.<span class="function">read_csv</span>(<span class="string">'vgsales.csv'</span>)<br>
-df = df.<span class="function">dropna</span>()<br>
-<span class="function">print</span>(df.<span class="function">shape</span>)<br>
-<br>
-<span class="comment"># Variable objetivo: exito si vende mas de 1 millon</span><br>
-df[<span class="string">'Exito'</span>] = (df[<span class="string">'Global_Sales'</span>] > 1.0).<span class="function">astype</span>(int)<br>
-<br>
-<span class="comment"># Codificar categoricas</span><br>
-le_platform = <span class="function">LabelEncoder</span>()<br>
-le_genre = <span class="function">LabelEncoder</span>()<br>
-le_publisher = <span class="function">LabelEncoder</span>()<br>
-<br>
-df[<span class="string">'Platform_enc'</span>] = le_platform.<span class="function">fit_transform</span>(df[<span class="string">'Platform'</span>])<br>
-df[<span class="string">'Genre_enc'</span>] = le_genre.<span class="function">fit_transform</span>(df[<span class="string">'Genre'</span>])<br>
-df[<span class="string">'Publisher_enc'</span>] = le_publisher.<span class="function">fit_transform</span>(df[<span class="string">'Publisher'</span>])<br>
-<br>
-<span class="comment"># Variables de entrada y salida</span><br>
-X = df[[<span class="string">'Platform_enc'</span>, <span class="string">'Genre_enc'</span>, <span class="string">'Publisher_enc'</span>, <span class="string">'Year'</span>, <span class="string">'NA_Sales'</span>]]<br>
-y = df[<span class="string">'Exito'</span>]<br>
-<br>
-<span class="comment"># Dividir 80/20</span><br>
-X_train, X_test, y_train, y_test = <span class="function">train_test_split</span>(X, y, test_size=0.2, random_state=42)<br>
-<br>
-<span class="comment"># Entrenar</span><br>
-modelo = <span class="function">RandomForestClassifier</span>(n_estimators=100, random_state=42)<br>
-modelo.<span class="function">fit</span>(X_train, y_train)<br>
-<br>
-<span class="comment"># Evaluar</span><br>
-pred = modelo.<span class="function">predict</span>(X_test)<br>
-<span class="function">print</span>(f<span class="string">"Accuracy: {accuracy_score(y_test, pred)}"</span>)<br>
+            <div class="text-center fade-up">
+                <div class="section-label">Implementacion</div>
+                <h2 class="section-title mb-4">Codigo fuente</h2>
+            </div>
+            <div class="row justify-content-center"><div class="col-lg-10 fade-up">
+                <div class="code-block">
+<span class="comment"># Importar librerias</span>
+<span class="keyword">import</span> pandas <span class="keyword">as</span> pd
+<span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split
+<span class="keyword">from</span> sklearn.ensemble <span class="keyword">import</span> RandomForestClassifier
+<span class="keyword">from</span> sklearn.preprocessing <span class="keyword">import</span> LabelEncoder
+<span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> accuracy_score, classification_report
+
+<span class="comment"># Cargar el dataset</span>
+df = pd.<span class="function">read_csv</span>(<span class="string">'vgsales.csv'</span>)
+df = df.<span class="function">dropna</span>()
+
+<span class="comment"># Variable objetivo: exito si vende mas de 1 millon</span>
+df[<span class="string">'Exito'</span>] = (df[<span class="string">'Global_Sales'</span>] > 1.0).<span class="function">astype</span>(int)
+
+<span class="comment"># Codificar categoricas</span>
+le_platform = <span class="function">LabelEncoder</span>()
+le_genre = <span class="function">LabelEncoder</span>()
+le_publisher = <span class="function">LabelEncoder</span>()
+
+df[<span class="string">'Platform_enc'</span>] = le_platform.<span class="function">fit_transform</span>(df[<span class="string">'Platform'</span>])
+df[<span class="string">'Genre_enc'</span>] = le_genre.<span class="function">fit_transform</span>(df[<span class="string">'Genre'</span>])
+df[<span class="string">'Publisher_enc'</span>] = le_publisher.<span class="function">fit_transform</span>(df[<span class="string">'Publisher'</span>])
+
+<span class="comment"># Variables de entrada y salida</span>
+X = df[[<span class="string">'Platform_enc'</span>, <span class="string">'Genre_enc'</span>, <span class="string">'Publisher_enc'</span>, <span class="string">'Year'</span>, <span class="string">'NA_Sales'</span>]]
+y = df[<span class="string">'Exito'</span>]
+
+<span class="comment"># Dividir 80/20</span>
+X_train, X_test, y_train, y_test = <span class="function">train_test_split</span>(X, y, test_size=0.2, random_state=42)
+
+<span class="comment"># Entrenar</span>
+modelo = <span class="function">RandomForestClassifier</span>(n_estimators=100, random_state=42)
+modelo.<span class="function">fit</span>(X_train, y_train)
+
+<span class="comment"># Evaluar</span>
+pred = modelo.<span class="function">predict</span>(X_test)
+<span class="function">print</span>(f<span class="string">"Accuracy: {accuracy_score(y_test, pred)}"</span>)
 <span class="function">print</span>(<span class="function">classification_report</span>(y_test, pred))
-                    </div>
                 </div>
-            </div>
+            </div></div>
         </div>
     </section>
 
-    <!-- Resultados -->
-    <section class="container my-5">
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
-                <h2 style="color: #0d9488;">&gt; SCORE BOARD: Resultados_</h2>
-                <p class="mt-3">Resultados con 100 arboles:</p>
-
-                <table class="table">
-                    <thead>
-                        <tr><th>METRICA</th><th>FRACASO (0)</th><th>EXITO (1)</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>Precision</td><td>0.82</td><td>0.70</td></tr>
-                        <tr><td>Recall</td><td>0.88</td><td>0.59</td></tr>
-                        <tr><td>F1-Score</td><td>0.85</td><td>0.64</td></tr>
-                    </tbody>
-                </table>
-
-                <div class="mt-3 mb-4">
-                    <span style="color: #888; font-family: 'Press Start 2P'; font-size: 0.45rem;">TOTAL ACCURACY:</span>
-                    <div class="stat-bar mt-2" style="max-width: 350px;">
-                        <div class="stat-bar-fill" style="width: 78%; background: linear-gradient(90deg, #0d9488, #2dd4bf);"></div>
-                        <span class="stat-bar-label">78% HP</span>
-                    </div>
-                </div>
-
-                <h4 class="mt-4" style="color: #e11d48;">CONFUSION MATRIX</h4>
-                <table class="table text-center" style="max-width: 380px;">
-                    <thead>
-                        <tr>
-                            <th style="background: #6b7280;"></th>
-                            <th style="background: #ef4444;">PRED: FAIL</th>
-                            <th style="background: #0d9488;">PRED: WIN</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>REAL: FAIL</strong></td>
-                            <td style="color: #0d9488; font-weight: bold;">1842</td>
-                            <td style="color: #e11d48;">251</td>
-                        </tr>
-                        <tr>
-                            <td><strong>REAL: WIN</strong></td>
-                            <td style="color: #e11d48;">198</td>
-                            <td style="color: #0d9488; font-weight: bold;">285</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <p style="color: #888;">
-                    El modelo predice mejor los fracasos porque hay muchos mas juegos que venden poco. Dataset desbalanceado.
-                </p>
-
-                <h4 class="mt-4" style="color: #5b21b6;">FEATURE IMPORTANCE</h4>
-                <div class="card-retro p-4 mt-2" style="border-left: 5px solid #7c3aed;">
-                    <div class="mb-3">
-                        <span style="color: #5b21b6; font-weight: bold;">NA_Sales</span>
-                        <div class="stat-bar mt-1"><div class="stat-bar-fill" style="width:84%; background-color: #f59e0b;"></div><span class="stat-bar-label">0.42</span></div>
-                    </div>
-                    <div class="mb-3">
-                        <span style="color: #5b21b6; font-weight: bold;">Publisher</span>
-                        <div class="stat-bar mt-1"><div class="stat-bar-fill" style="width:42%; background-color: #0d9488;"></div><span class="stat-bar-label">0.21</span></div>
-                    </div>
-                    <div class="mb-3">
-                        <span style="color: #5b21b6; font-weight: bold;">Year</span>
-                        <div class="stat-bar mt-1"><div class="stat-bar-fill" style="width:30%; background-color: #7c3aed;"></div><span class="stat-bar-label">0.15</span></div>
-                    </div>
-                    <div class="mb-3">
-                        <span style="color: #5b21b6; font-weight: bold;">Platform</span>
-                        <div class="stat-bar mt-1"><div class="stat-bar-fill" style="width:26%; background-color: #e11d48;"></div><span class="stat-bar-label">0.13</span></div>
-                    </div>
-                    <div>
-                        <span style="color: #5b21b6; font-weight: bold;">Genre</span>
-                        <div class="stat-bar mt-1"><div class="stat-bar-fill" style="width:18%; background-color: #6366f1;"></div><span class="stat-bar-label">0.09</span></div>
-                    </div>
-                </div>
-                <p class="mt-3" style="color: #888;">
-                    Las ventas en Norteamerica son el mejor predictor. Publishers grandes como
-                    Nintendo o Rockstar tienden a vender mas.
-                </p>
+    <section class="section">
+        <div class="container"><div class="row"><div class="col-lg-8 mx-auto fade-up">
+            <div class="section-label">Resultados</div>
+            <h2 class="section-title">Metricas del modelo</h2>
+            <p class="mt-2">Resultados con 100 arboles:</p>
+            <div style="border-radius:12px; overflow:hidden; border:1px solid var(--border);" class="mt-3">
+                <table class="table-clean"><thead><tr><th>Metrica</th><th>Fracaso (0)</th><th>Exito (1)</th></tr></thead>
+                <tbody>
+                    <tr><td>Precision</td><td>0.82</td><td>0.70</td></tr>
+                    <tr><td>Recall</td><td>0.88</td><td>0.59</td></tr>
+                    <tr><td>F1-Score</td><td>0.85</td><td>0.64</td></tr>
+                </tbody></table>
             </div>
-        </div>
+            <div class="mt-4">
+                <p class="fw-semibold mb-1">Accuracy total: <strong style="color:var(--accent);">78%</strong></p>
+                <div class="progress-bar-custom" style="max-width:320px;"><div class="progress-fill" style="width:78%; background:var(--accent);"></div></div>
+            </div>
+
+            <h5 class="mt-5 mb-3">Matriz de Confusion</h5>
+            <div style="border-radius:12px; overflow:hidden; border:1px solid var(--border); max-width:380px;">
+                <table class="table-clean text-center"><thead><tr><th></th><th>Pred: Fracaso</th><th>Pred: Exito</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>Real: Fracaso</strong></td><td><strong style="color:#059669;">1842</strong></td><td style="color:#dc2626;">251</td></tr>
+                    <tr><td><strong>Real: Exito</strong></td><td style="color:#dc2626;">198</td><td><strong style="color:#059669;">285</strong></td></tr>
+                </tbody></table>
+            </div>
+            <p class="mt-2" style="font-size:0.9rem;">El modelo predice mejor los fracasos porque hay muchos mas juegos que venden poco.</p>
+
+            <h5 class="mt-5 mb-3">Importancia de Variables</h5>
+            <div class="info-box" style="border-left:3px solid var(--accent);">
+                <div class="bar-item"><div class="d-flex justify-content-between"><span class="bar-label">NA_Sales</span><span class="bar-value">0.42</span></div><div class="progress-bar-custom"><div class="progress-fill" style="width:84%; background:var(--accent);"></div></div></div>
+                <div class="bar-item"><div class="d-flex justify-content-between"><span class="bar-label">Publisher</span><span class="bar-value">0.21</span></div><div class="progress-bar-custom"><div class="progress-fill" style="width:42%; background:#818cf8;"></div></div></div>
+                <div class="bar-item"><div class="d-flex justify-content-between"><span class="bar-label">Year</span><span class="bar-value">0.15</span></div><div class="progress-bar-custom"><div class="progress-fill" style="width:30%; background:#94a3b8;"></div></div></div>
+                <div class="bar-item"><div class="d-flex justify-content-between"><span class="bar-label">Platform</span><span class="bar-value">0.13</span></div><div class="progress-bar-custom"><div class="progress-fill" style="width:26%; background:#94a3b8;"></div></div></div>
+                <div class="bar-item mb-0"><div class="d-flex justify-content-between"><span class="bar-label">Genre</span><span class="bar-value">0.09</span></div><div class="progress-bar-custom"><div class="progress-fill" style="width:18%; background:#cbd5e1;"></div></div></div>
+            </div>
+            <p class="mt-2" style="font-size:0.9rem;">Las ventas en Norteamerica son el mejor predictor.</p>
+        </div></div></div>
     </section>
 
-    <!-- Conclusiones -->
-    <section class="bg-soft py-5">
+    <section class="section section-alt">
+        <div class="container"><div class="row"><div class="col-lg-8 mx-auto fade-up">
+            <div class="section-label">Conclusiones</div>
+            <h2 class="section-title">Conclusiones y mejoras</h2>
+            <div class="info-box mt-4">
+                <p>El modelo logro 78%, decente para un primer intento. Mejoras posibles:</p>
+                <ul><li>Balancear clases con SMOTE o undersampling</li><li>Agregar variables como puntuacion Metacritic o si es secuela</li><li>Probar XGBoost o Gradient Boosting</li><li>Feature engineering: crear "publisher_grande" para top 10</li></ul>
+            </div>
+        </div></div></div>
+    </section>
+
+    <footer class="text-center">
         <div class="container">
-            <div class="row">
-                <div class="col-lg-8 mx-auto">
-                    <h2 style="color: #0d9488;">&gt; GAME CLEAR: Conclusiones_</h2>
-                    <div class="pixel-border p-4 mt-3" style="background-color: #fff;">
-                        <p>El modelo logro 78%, decente para un primer intento. Mejoras posibles:</p>
-                        <ul>
-                            <li>Balancear clases con SMOTE o undersampling</li>
-                            <li>Agregar variables como puntuacion Metacritic o si es secuela</li>
-                            <li>Probar XGBoost o Gradient Boosting</li>
-                            <li>Feature engineering: crear "publisher_grande" para top 10</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="py-4 mt-5 text-center">
-        <div class="container">
-            <p style="font-family: 'Press Start 2P'; font-size: 0.45rem; color: #2dd4bf;">STAGE 1 COMPLETE</p>
-            <p class="mb-0"><a href="/" style="color: #fbbf24; text-decoration: none; font-family: 'Press Start 2P'; font-size: 0.5rem;">&lt; VOLVER AL INICIO</a></p>
+            <a href="/" class="btn-back">&larr; Volver al inicio</a>
+            <p class="mt-3 mb-0" style="font-size:0.85rem;">Proyecto universitario &mdash; 2025</p>
         </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const obs = new IntersectionObserver(entries => { entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }); }, {threshold:0.1});
+        document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+    </script>
 </body>
 </html>
