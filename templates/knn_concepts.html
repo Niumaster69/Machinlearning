@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K-Nearest Neighbors - Basic Concepts</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #059669;
+            --accent-soft: #ecfdf5;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --bg: #ffffff;
+            --bg-alt: #f8fafc;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; color:var(--text); background:var(--bg); overflow-x:hidden; }
+        h1,h2,h3,h4,h5,h6 { font-weight:700; letter-spacing:-0.025em; }
+        p { line-height:1.75; color:var(--text-secondary); }
+
+        .navbar { background:rgba(255,255,255,0.92)!important; backdrop-filter:blur(24px); border-bottom:1px solid var(--border); padding:0.9rem 0; z-index:1050; }
+        .navbar-brand { font-weight:800; font-size:1rem; color:var(--text)!important; letter-spacing:-0.04em; }
+        .nav-link { color:var(--text-secondary)!important; font-weight:500; font-size:0.85rem; padding:0.5rem 1rem!important; transition:color 0.2s; }
+        .nav-link:hover,.nav-link.active { color:#059669!important; }
+        .dropdown-menu { background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:0.5rem; min-width:230px; box-shadow:0 12px 32px rgba(0,0,0,0.08); }
+        .dropdown-item { color:var(--text-secondary); border-radius:10px; padding:0.65rem 1rem; font-size:0.85rem; transition:background 0.15s; }
+        .dropdown-item:hover { background:var(--accent-soft); color:var(--accent); }
+        .dropdown-item small { color:var(--text-muted); }
+
+        .hero-page { background:linear-gradient(135deg, #ecfdf5 0%, #f8fafc 100%); padding:8rem 0 4rem; position:relative; overflow:hidden; }
+        .hero-page::before { content:''; position:absolute; top:-30%; right:-10%; width:500px; height:500px; background:radial-gradient(circle,rgba(5,150,105,0.08),transparent 65%); animation:drift 18s ease-in-out infinite; }
+        @keyframes drift { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-20px,-15px)} }
+        .hero-page h1 { font-size:clamp(1.8rem,4vw,2.8rem); color:var(--text); font-weight:800; line-height:1.15; }
+        .hero-page h1 span { color:var(--accent); }
+        .hero-page p { color:var(--text-secondary); font-size:1.05rem; }
+        .badge-line { display:inline-block; color:var(--text-muted); font-size:0.75rem; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:1.2rem; border-left:2px solid var(--accent); padding-left:0.75rem; }
+
+        .section { padding:5rem 0; }
+        .section-alt { background:var(--bg-alt); }
+        .section-label { text-transform:uppercase; font-weight:600; font-size:0.75rem; letter-spacing:0.12em; color:var(--accent); margin-bottom:0.6rem; }
+        .section-title { font-size:1.65rem; margin-bottom:0.5rem; }
+        .section-sub { color:var(--text-muted); font-size:0.95rem; margin-bottom:2.5rem; }
+
+        .card-clean { background:var(--bg); border:1px solid var(--border); border-radius:16px; padding:2rem; transition:all 0.3s ease; height:100%; }
+        .card-clean:hover { transform:translateY(-3px); box-shadow:0 16px 40px rgba(0,0,0,0.06); border-color:var(--accent); }
+
+        .info-box { background:var(--bg-alt); border:1px solid var(--border); border-radius:16px; padding:2rem; margin-bottom:2rem; }
+
+        .equation-box { background:var(--accent-soft); border:1px solid rgba(5,150,105,0.15); border-radius:14px; padding:1.8rem; text-align:center; margin:1.5rem 0; }
+        .equation-box .equation { font-family:'JetBrains Mono',monospace; font-size:1.2rem; font-weight:700; color:var(--accent); }
+        .equation-box .equation-label { font-size:0.78rem; color:var(--text-muted); margin-top:0.5rem; font-weight:500; }
+
+        .tag { display:inline-block; padding:0.2rem 0.7rem; border-radius:50px; font-size:0.72rem; font-weight:600; letter-spacing:0.04em; }
+        .tag-green { background:#ecfdf5; color:#059669; }
+        .tag-blue { background:#eef1fe; color:#4f6ef7; }
+        .tag-amber { background:#fef3c7; color:#d97706; }
+        .tag-red { background:#fef2f2; color:#dc2626; }
+
+        .table-clean { width:100%; border-collapse:collapse; }
+        .table-clean th { background:var(--accent-soft); color:var(--accent); font-weight:600; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.06em; padding:0.9rem 1rem; text-align:left; }
+        .table-clean td { padding:0.8rem 1rem; border-bottom:1px solid var(--border-light); font-size:0.93rem; color:var(--text-secondary); }
+        .table-clean tbody tr:hover { background:var(--bg-alt); }
+
+        .btn-main { display:inline-flex; align-items:center; gap:0.5rem; padding:0.7rem 1.4rem; border-radius:10px; font-weight:600; font-size:0.85rem; text-decoration:none; transition:all 0.2s; border:1.5px solid var(--accent); color:var(--accent); background:transparent; }
+        .btn-main:hover { background:var(--accent); color:#fff; }
+        .btn-main-fill { background:var(--accent); color:#fff; border-color:var(--accent); }
+        .btn-main-fill:hover { background:#047857; color:#fff; }
+
+        footer { background:var(--bg-alt); border-top:1px solid var(--border); color:var(--text-muted); padding:3rem 0; }
+
+        .fade-up { opacity:0; transform:translateY(25px); transition:all 0.5s ease; }
+        .fade-up.visible { opacity:1; transform:translateY(0); }
+
+        @media(max-width:767px) { .section { padding:3.5rem 0; } .hero-page { padding:7rem 0 3rem; } }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">Machine Learning</a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/use-cases">Use Cases</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Linear Regression</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/linear-regression/concepts">Basic Concepts</a></li>
+                            <li><a class="dropdown-item" href="/linear-regression/application">Application</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Logistic Regression</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/logistic-regression/concepts">Basic Concepts</a></li>
+                            <li><a class="dropdown-item" href="/logistic-regression/application">Application</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">KNN</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/knn/concepts" style="background:var(--accent-soft);">Basic Concepts</a></li>
+                            <li><a class="dropdown-item" href="/knn/application">Application</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero-page">
+        <div class="container position-relative" style="z-index:2;">
+            <div class="row"><div class="col-lg-8">
+                <div class="badge-line">Supervised Learning // Classification</div>
+                <h1>K-Nearest Neighbors<br><span>Basic Concepts</span></h1>
+                <p class="mt-3">Understanding how KNN classifies data by finding the most similar examples in the training set.</p>
+            </div></div>
+        </div>
+    </section>
+
+    <!-- What is KNN -->
+    <section class="section">
+        <div class="container"><div class="row"><div class="col-lg-9 mx-auto fade-up">
+            <div class="section-label">Definition</div>
+            <h2 class="section-title">What is K-Nearest Neighbors?</h2>
+            <div class="info-box mt-4">
+                <p><strong>K-Nearest Neighbors (KNN)</strong> is a supervised machine learning algorithm used for both <strong>classification</strong> and <strong>regression</strong> tasks. It is one of the simplest and most intuitive algorithms in machine learning.</p>
+                <p>KNN is a <strong>lazy learner</strong> (also called instance-based learning), meaning it does not build an explicit model during training. Instead, it stores the entire training dataset and makes predictions at query time by looking at the closest data points.</p>
+                <p class="mb-0">The core idea is simple: <em>"Tell me who your neighbors are, and I will tell you who you are."</em> A new data point is classified based on the majority vote of its K nearest neighbors in the feature space.</p>
+            </div>
+        </div></div></div>
+    </section>
+
+    <!-- How it Works -->
+    <section class="section section-alt">
+        <div class="container"><div class="row"><div class="col-lg-9 mx-auto fade-up">
+            <div class="section-label">Algorithm</div>
+            <h2 class="section-title">How KNN Works</h2>
+            <p class="section-sub">A step-by-step overview of the classification process.</p>
+
+            <div class="row g-3">
+                <div class="col-md-6 col-lg-3">
+                    <div class="card-clean text-center">
+                        <span class="tag tag-green mb-3">Step 1</span>
+                        <h6>Choose K</h6>
+                        <p class="mb-0" style="font-size:0.88rem;">Select the number of neighbors (K) to consider for the vote.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="card-clean text-center">
+                        <span class="tag tag-green mb-3">Step 2</span>
+                        <h6>Calculate Distance</h6>
+                        <p class="mb-0" style="font-size:0.88rem;">Compute the distance between the new point and all training points.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="card-clean text-center">
+                        <span class="tag tag-green mb-3">Step 3</span>
+                        <h6>Find Neighbors</h6>
+                        <p class="mb-0" style="font-size:0.88rem;">Select the K training points closest to the new data point.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="card-clean text-center">
+                        <span class="tag tag-green mb-3">Step 4</span>
+                        <h6>Majority Vote</h6>
+                        <p class="mb-0" style="font-size:0.88rem;">Assign the class that appears most frequently among the K neighbors.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="equation-box mt-4">
+                <div class="equation">d(p, q) = &radic;(&Sigma;(p<sub>i</sub> - q<sub>i</sub>)&sup2;)</div>
+                <div class="equation-label">Euclidean Distance &mdash; the most common distance metric used in KNN</div>
+            </div>
+        </div></div></div>
+    </section>
+
+    <!-- Main Characteristics -->
+    <section class="section">
+        <div class="container"><div class="row"><div class="col-lg-9 mx-auto fade-up">
+            <div class="section-label">Characteristics</div>
+            <h2 class="section-title">Main Characteristics</h2>
+
+            <div class="row g-4 mt-2">
+                <div class="col-md-6">
+                    <div class="card-clean">
+                        <span class="tag tag-blue mb-3">Non-parametric</span>
+                        <h5>No Assumptions</h5>
+                        <p class="mb-0">KNN makes no assumptions about the underlying data distribution. It works with any shape of decision boundary, unlike logistic regression which assumes linearity.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card-clean">
+                        <span class="tag tag-amber mb-3">Lazy Learner</span>
+                        <h5>No Training Phase</h5>
+                        <p class="mb-0">There is no explicit training step. The algorithm simply memorizes the dataset. All computation happens during prediction, making training instant but prediction slower.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card-clean">
+                        <span class="tag tag-green mb-3">Instance-Based</span>
+                        <h5>Uses Raw Data</h5>
+                        <p class="mb-0">Predictions are based directly on the stored training instances rather than a learned set of parameters or weights.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card-clean">
+                        <span class="tag tag-red mb-3">Distance-Based</span>
+                        <h5>Feature Scaling Required</h5>
+                        <p class="mb-0">Since KNN relies on distance calculations, all features must be scaled to the same range. Otherwise, features with larger magnitudes dominate the distance computation.</p>
+                    </div>
+                </div>
+            </div>
+        </div></div></div>
+    </section>
+
+    <!-- Choosing K -->
+    <section class="section section-alt">
+        <div class="container"><div class="row"><div class="col-lg-9 mx-auto fade-up">
+            <div class="section-label">Hyperparameter</div>
+            <h2 class="section-title">Choosing the Value of K</h2>
+
+            <div class="info-box mt-4">
+                <p>The value of <strong>K</strong> is the most important hyperparameter in KNN. It determines how many neighbors influence the classification decision.</p>
+                <p class="mb-2">Key guidelines for choosing K:</p>
+                <ul style="color:var(--text-secondary); line-height:2;">
+                    <li><strong>Small K (e.g., 1-3):</strong> More sensitive to noise and outliers, can lead to overfitting. Creates complex, jagged decision boundaries.</li>
+                    <li><strong>Large K (e.g., 15-50):</strong> Smoother decision boundaries, more robust to noise, but may underfit and blur class boundaries.</li>
+                    <li><strong>Odd K:</strong> Preferred for binary classification to avoid tie-breaking situations.</li>
+                    <li><strong>Common rule of thumb:</strong> Start with K = &radic;N where N is the number of training samples.</li>
+                </ul>
+                <p class="mb-0">In our application, we use <strong>K = 7</strong>, which provides a good balance between capturing local patterns and avoiding noise sensitivity.</p>
+            </div>
+        </div></div></div>
+    </section>
+
+    <!-- Distance Metrics -->
+    <section class="section">
+        <div class="container"><div class="row"><div class="col-lg-9 mx-auto fade-up">
+            <div class="section-label">Distance</div>
+            <h2 class="section-title">Distance Metrics</h2>
+
+            <div class="row g-4 mt-2">
+                <div class="col-md-6">
+                    <div class="card-clean">
+                        <span class="tag tag-green mb-3">Most Common</span>
+                        <h5>Euclidean Distance</h5>
+                        <p class="mb-2">The straight-line distance between two points in feature space. Works well when features have similar scales.</p>
+                        <div class="equation-box" style="margin:0;">
+                            <div class="equation" style="font-size:1rem;">&radic;(&Sigma;(x<sub>i</sub> - y<sub>i</sub>)&sup2;)</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card-clean">
+                        <span class="tag tag-blue mb-3">Alternative</span>
+                        <h5>Manhattan Distance</h5>
+                        <p class="mb-2">The sum of absolute differences along each dimension. Better suited for high-dimensional or sparse data.</p>
+                        <div class="equation-box" style="margin:0;">
+                            <div class="equation" style="font-size:1rem;">&Sigma;|x<sub>i</sub> - y<sub>i</sub>|</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div></div></div>
+    </section>
+
+    <!-- Advantages and Limitations -->
+    <section class="section section-alt">
+        <div class="container"><div class="row"><div class="col-lg-9 mx-auto fade-up">
+            <div class="section-label">Trade-offs</div>
+            <h2 class="section-title">Advantages and Limitations</h2>
+
+            <div class="row g-4 mt-2">
+                <div class="col-md-6">
+                    <div class="info-box" style="border-left:3px solid #059669;">
+                        <h5 style="color:#059669; font-size:0.95rem;">Advantages</h5>
+                        <ul style="color:var(--text-secondary); font-size:0.9rem; line-height:2;" class="mb-0">
+                            <li>Simple to understand and implement</li>
+                            <li>No training phase needed</li>
+                            <li>Naturally handles multiclass problems</li>
+                            <li>No assumptions about data distribution</li>
+                            <li>Can capture complex non-linear boundaries</li>
+                            <li>Easy to add new data (no retraining)</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="info-box" style="border-left:3px solid #dc2626;">
+                        <h5 style="color:#dc2626; font-size:0.95rem;">Limitations</h5>
+                        <ul style="color:var(--text-secondary); font-size:0.9rem; line-height:2;" class="mb-0">
+                            <li>Slow predictions on large datasets</li>
+                            <li>Sensitive to irrelevant features</li>
+                            <li>Requires feature scaling</li>
+                            <li>High memory usage (stores all data)</li>
+                            <li>Suffers from the curse of dimensionality</li>
+                            <li>Choosing the right K can be challenging</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div></div></div>
+    </section>
+
+    <!-- Types of Problems -->
+    <section class="section">
+        <div class="container"><div class="row"><div class="col-lg-9 mx-auto fade-up">
+            <div class="section-label">Applications</div>
+            <h2 class="section-title">Types of Classification Problems</h2>
+
+            <div class="info-box mt-4">
+                <p>KNN works well for classification problems where:</p>
+                <ul style="color:var(--text-secondary); line-height:2;">
+                    <li><strong>Decision boundaries are irregular</strong> &mdash; KNN can model complex, non-linear boundaries naturally.</li>
+                    <li><strong>The dataset is small to medium-sized</strong> &mdash; KNN's prediction time scales linearly with dataset size.</li>
+                    <li><strong>Classes overlap partially</strong> &mdash; the probabilistic voting mechanism handles overlapping classes gracefully.</li>
+                    <li><strong>Interpretability matters</strong> &mdash; you can always explain predictions by showing the neighbors.</li>
+                </ul>
+                <p class="mb-0">Common application domains include recommendation systems, pattern recognition, medical diagnosis, text categorization, and image classification.</p>
+            </div>
+        </div></div></div>
+    </section>
+
+    <!-- Real-world Example -->
+    <section class="section section-alt">
+        <div class="container"><div class="row"><div class="col-lg-9 mx-auto fade-up">
+            <div class="section-label">Real World</div>
+            <h2 class="section-title">Real-World Use Example: ESRB Rating Prediction</h2>
+
+            <div class="info-box mt-4">
+                <p>In our application, we use KNN to predict the <strong>ESRB rating</strong> (E, E10+, T, M) of a video game based on its characteristics such as genre, sales figures, platform, and critical reception.</p>
+                <p><strong>Why KNN for this problem?</strong> ESRB ratings are influenced by a complex combination of factors that do not follow simple linear patterns. A violent shooter game (rated M) has very different characteristics from a family-friendly sports game (rated E). KNN can capture these non-linear patterns by finding the most similar games in the dataset.</p>
+                <p class="mb-0">The model analyzes <strong>6,943 video games</strong> to learn which combinations of features are associated with each rating category, then classifies new games by comparing them to the 7 most similar games it has seen.</p>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="/knn/application" class="btn-main btn-main-fill">Try the Application &rarr;</a>
+            </div>
+        </div></div></div>
+    </section>
+
+    <footer class="text-center">
+        <div class="container">
+            <p class="mb-1"><strong>Machine Learning applied to Video Games</strong></p>
+            <p class="mb-1" style="font-size:0.85rem;">Duvan Lozano Romero &mdash; Systems Engineering Student</p>
+            <p class="mb-0" style="font-size:0.8rem;">Universidad de Cundinamarca &mdash; Extension Chia &mdash; 2026</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const obs = new IntersectionObserver(entries => {
+            entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+        }, {threshold:0.1});
+        document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+    </script>
+</body>
+</html>
