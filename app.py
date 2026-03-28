@@ -3,6 +3,7 @@ import LinearRegrression
 import LogisticRegressionModel
 import SteamLinearRegression
 import ConsoleWarsLogisticRegression
+import RatingKNNClassifier
 
 app = Flask(__name__)
 #py -m flask run
@@ -86,4 +87,41 @@ def logistic_application():
         dataset_size=ConsoleWarsLogisticRegression.dataset_size,
         train_size=ConsoleWarsLogisticRegression.train_size,
         test_size=ConsoleWarsLogisticRegression.test_size,
+    )
+
+@app.route('/knn/concepts')
+def knn_concepts():
+    return render_template('knn_concepts.html')
+
+@app.route('/knn/application', methods=["GET", "POST"])
+def knn_application():
+    result = None
+    probabilities = None
+    if request.method == "POST":
+        genre = request.form["genre"]
+        platform_family = request.form["platform_family"]
+        na_sales = float(request.form["na_sales"])
+        eu_sales = float(request.form["eu_sales"])
+        jp_sales = float(request.form["jp_sales"])
+        other_sales = float(request.form["other_sales"])
+        critic_score = float(request.form["critic_score"])
+        user_score = float(request.form["user_score"])
+        result, probabilities = RatingKNNClassifier.predict_rating(
+            genre, platform_family, na_sales, eu_sales, jp_sales,
+            other_sales, critic_score, user_score
+        )
+    return render_template(
+        "knn_application.html",
+        result=result,
+        probabilities=probabilities,
+        genres=RatingKNNClassifier.all_genres,
+        platform_families=RatingKNNClassifier.all_platform_families,
+        accuracy=RatingKNNClassifier.accuracy,
+        precision=RatingKNNClassifier.precision,
+        recall=RatingKNNClassifier.recall,
+        f1=RatingKNNClassifier.f1,
+        dataset_size=RatingKNNClassifier.dataset_size,
+        train_size=RatingKNNClassifier.train_size,
+        test_size=RatingKNNClassifier.test_size,
+        k_value=RatingKNNClassifier.K_VALUE,
     )
