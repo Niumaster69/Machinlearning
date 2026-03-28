@@ -2,6 +2,7 @@ from flask import Flask, render_template, request
 import LinearRegrression
 import LogisticRegressionModel
 import SteamLinearRegression
+import ConsoleWarsLogisticRegression
 
 app = Flask(__name__)
 #py -m flask run
@@ -53,3 +54,36 @@ def logisticRegression():
         input_scaled = LogisticRegressionModel.scaler.transform([[edad, ingreso_mensual, visitas_web_mes, tiempo_sitio_min, compras_previas, descuento_usado]])
         calculateResult = LogisticRegressionModel.logistic_model.predict(input_scaled)[0]
     return render_template("logisticRegression.html", result=calculateResult)
+
+@app.route('/logistic-regression/concepts')
+def logistic_concepts():
+    return render_template('logistic_regression_concepts.html')
+
+@app.route('/logistic-regression/application', methods=["GET", "POST"])
+def logistic_application():
+    result = None
+    probabilities = None
+    if request.method == "POST":
+        genre = request.form["genre"]
+        na_sales = float(request.form["na_sales"])
+        eu_sales = float(request.form["eu_sales"])
+        jp_sales = float(request.form["jp_sales"])
+        other_sales = float(request.form["other_sales"])
+        critic_score = float(request.form["critic_score"])
+        user_score = float(request.form["user_score"])
+        result, probabilities = ConsoleWarsLogisticRegression.predict_platform(
+            genre, na_sales, eu_sales, jp_sales, other_sales, critic_score, user_score
+        )
+    return render_template(
+        "logistic_regression_application.html",
+        result=result,
+        probabilities=probabilities,
+        genres=ConsoleWarsLogisticRegression.all_genres,
+        accuracy=ConsoleWarsLogisticRegression.accuracy,
+        precision=ConsoleWarsLogisticRegression.precision,
+        recall=ConsoleWarsLogisticRegression.recall,
+        f1=ConsoleWarsLogisticRegression.f1,
+        dataset_size=ConsoleWarsLogisticRegression.dataset_size,
+        train_size=ConsoleWarsLogisticRegression.train_size,
+        test_size=ConsoleWarsLogisticRegression.test_size,
+    )
