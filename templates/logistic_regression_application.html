@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logistic Regression - Console Wars Application</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #4f6ef7;
+            --accent-soft: #eef1fe;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --bg: #ffffff;
+            --bg-alt: #f8fafc;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; color:var(--text); background:var(--bg); overflow-x:hidden; }
+        h1,h2,h3,h4,h5,h6 { font-weight:700; letter-spacing:-0.025em; }
+        p { line-height:1.75; color:var(--text-secondary); }
+
+        .navbar { background:rgba(255,255,255,0.92)!important; backdrop-filter:blur(24px); border-bottom:1px solid var(--border); padding:0.9rem 0; z-index:1050; }
+        .navbar-brand { font-weight:800; font-size:1rem; color:var(--text)!important; letter-spacing:-0.04em; }
+        .nav-link { color:var(--text-secondary)!important; font-weight:500; font-size:0.85rem; padding:0.5rem 1rem!important; transition:color 0.2s; }
+        .nav-link:hover,.nav-link.active { color:var(--accent)!important; }
+        .dropdown-menu { background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:0.5rem; min-width:230px; box-shadow:0 12px 32px rgba(0,0,0,0.08); }
+        .dropdown-item { color:var(--text-secondary); border-radius:10px; padding:0.65rem 1rem; font-size:0.85rem; transition:background 0.15s; }
+        .dropdown-item:hover { background:var(--accent-soft); color:var(--accent); }
+        .dropdown-item small { color:var(--text-muted); }
+
+        .hero-page { background:linear-gradient(135deg, #eef1fe 0%, #f8fafc 100%); padding:8rem 0 4rem; position:relative; overflow:hidden; }
+        .hero-page::before { content:''; position:absolute; top:-30%; right:-10%; width:500px; height:500px; background:radial-gradient(circle,rgba(79,110,247,0.08),transparent 65%); animation:drift 18s ease-in-out infinite; }
+        @keyframes drift { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-20px,-15px)} }
+        .hero-page h1 { font-size:clamp(1.8rem,4vw,2.8rem); color:var(--text); font-weight:800; line-height:1.15; }
+        .hero-page h1 span { color:var(--accent); }
+        .hero-page p { color:var(--text-secondary); font-size:1.05rem; }
+        .badge-line { display:inline-block; color:var(--text-muted); font-size:0.75rem; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:1.2rem; border-left:2px solid var(--accent); padding-left:0.75rem; }
+
+        .section { padding:5rem 0; }
+        .section-alt { background:var(--bg-alt); }
+        .section-label { text-transform:uppercase; font-weight:600; font-size:0.75rem; letter-spacing:0.12em; color:var(--accent); margin-bottom:0.6rem; }
+        .section-title { font-size:1.65rem; margin-bottom:0.5rem; }
+
+        .info-box { background:var(--bg-alt); border:1px solid var(--border); border-radius:16px; padding:2rem; margin-bottom:2rem; }
+        .info-box-white { background:var(--bg); border:1px solid var(--border); border-radius:16px; padding:2rem; margin-bottom:2rem; }
+
+        .card-clean { background:var(--bg); border:1px solid var(--border); border-radius:16px; padding:2rem; transition:all 0.3s ease; height:100%; }
+        .card-clean:hover { transform:translateY(-3px); box-shadow:0 16px 40px rgba(0,0,0,0.06); border-color:var(--accent); }
+
+        .tag { display:inline-block; padding:0.2rem 0.7rem; border-radius:50px; font-size:0.72rem; font-weight:600; letter-spacing:0.04em; }
+        .tag-blue { background:var(--accent-soft); color:var(--accent); }
+        .tag-green { background:#ecfdf5; color:#059669; }
+        .tag-amber { background:#fef3c7; color:#d97706; }
+        .tag-red { background:#fef2f2; color:#dc2626; }
+
+        .table-clean { width:100%; border-collapse:collapse; }
+        .table-clean th { background:var(--accent-soft); color:var(--accent); font-weight:600; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.06em; padding:0.9rem 1rem; text-align:left; }
+        .table-clean td { padding:0.8rem 1rem; border-bottom:1px solid var(--border-light); font-size:0.93rem; color:var(--text-secondary); }
+        .table-clean tbody tr:hover { background:var(--bg-alt); }
+
+        .step-item { display:flex; gap:1.2rem; margin-bottom:1.5rem; }
+        .step-number { width:36px; height:36px; border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.8rem; flex-shrink:0; }
+        .step-content h5 { font-size:0.95rem; margin-bottom:0.3rem; }
+        .step-content p { font-size:0.88rem; margin-bottom:0; }
+
+        .metric-card { text-align:center; padding:1.5rem; background:var(--bg); border:1px solid var(--border); border-radius:14px; }
+        .metric-value { font-size:2rem; font-weight:800; color:var(--accent); font-family:'JetBrains Mono',monospace; }
+        .metric-label { font-size:0.78rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; margin-top:0.3rem; }
+
+        .graph-container { background:var(--bg); border:1px solid var(--border); border-radius:16px; padding:1.5rem; text-align:center; }
+        .graph-container img { width:100%; max-width:700px; border-radius:10px; }
+
+        .predict-form { background:var(--bg); border:1px solid var(--border); border-radius:16px; padding:2rem; }
+        .predict-form label { font-weight:600; font-size:0.85rem; color:var(--text); margin-bottom:0.3rem; }
+        .predict-form .form-control, .predict-form .form-select { border-radius:10px; border:1px solid var(--border); padding:0.6rem 1rem; font-size:0.9rem; }
+        .predict-form .form-control:focus, .predict-form .form-select:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(79,110,247,0.1); }
+
+        .result-box { background:linear-gradient(135deg, var(--accent-soft), #f0f4ff); border:1px solid rgba(79,110,247,0.2); border-radius:16px; padding:2rem; text-align:center; }
+        .result-platform { font-size:1.8rem; font-weight:800; color:var(--accent); }
+
+        .btn-main { display:inline-flex; align-items:center; gap:0.5rem; padding:0.7rem 1.4rem; border-radius:10px; font-weight:600; font-size:0.85rem; text-decoration:none; transition:all 0.2s; border:1.5px solid var(--accent); color:var(--accent); background:transparent; }
+        .btn-main:hover { background:var(--accent); color:#fff; }
+        .btn-main-fill { background:var(--accent); color:#fff; border-color:var(--accent); }
+        .btn-main-fill:hover { background:#3d5ce5; color:#fff; }
+
+        footer { background:var(--bg-alt); border-top:1px solid var(--border); color:var(--text-muted); padding:3rem 0; }
+
+        .fade-up { opacity:0; transform:translateY(25px); transition:all 0.5s ease; }
+        .fade-up.visible { opacity:1; transform:translateY(0); }
+
+        @media(max-width:767px) { .section { padding:3.5rem 0; } .hero-page { padding:7rem 0 3rem; } }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">Machine Learning</a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/use-cases">Use Cases</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Linear Regression</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/linear-regression/concepts">Basic Concepts</a></li>
+                            <li><a class="dropdown-item" href="/linear-regression/application">Application</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">Logistic Regression</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/logistic-regression/concepts">Basic Concepts</a></li>
+                            <li><a class="dropdown-item" href="/logistic-regression/application" style="background:var(--accent-soft);">Application</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">KNN</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/knn/concepts">Basic Concepts</a></li>
+                            <li><a class="dropdown-item" href="/knn/application">Application</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero-page">
+        <div class="container position-relative" style="z-index:2;">
+            <div class="badge-line">Supervised Learning &mdash; Classification Application</div>
+            <h1>Console Wars<br><span>Platform Prediction</span></h1>
+            <p class="mt-3" style="max-width:560px;">Using Logistic Regression to predict whether a video game belongs to PlayStation, Xbox, or Nintendo based on its characteristics.</p>
+        </div>
+    </section>
+
+    <!-- Problem Description -->
+    <section class="section">
+        <div class="container fade-up">
+            <div class="section-label">Problem Statement</div>
+            <h2 style="font-size:1.6rem; margin-bottom:1rem;">Can we predict which platform a game belongs to?</h2>
+            <div class="row g-4 mt-1">
+                <div class="col-lg-7">
+                    <p>The video game industry has been shaped by the fierce competition between three major platform families: <strong>PlayStation</strong>, <strong>Xbox</strong>, and <strong>Nintendo</strong>. Each platform has distinct characteristics in terms of the types of games available, regional popularity, and audience preferences.</p>
+                    <p>This application uses <strong>Logistic Regression</strong> to classify video games into their platform family based on features like sales distribution across regions, critical reception, and game genre.</p>
+                    <p class="mb-0">By analyzing patterns in over <strong>6,000 games</strong>, the model learns which combinations of features are most associated with each platform family.</p>
+                </div>
+                <div class="col-lg-5">
+                    <div class="info-box" style="border-left:3px solid var(--accent);">
+                        <h5 style="font-size:0.95rem;">Why does this matter?</h5>
+                        <p style="font-size:0.88rem;" class="mb-0">Understanding platform-specific game characteristics helps publishers make strategic decisions about game development and distribution. It also reveals how regional preferences and game genres influence the gaming ecosystem.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dataset Explanation -->
+    <section class="section section-alt">
+        <div class="container fade-up">
+            <div class="section-label">Dataset</div>
+            <h2 style="font-size:1.6rem; margin-bottom:1rem;">Video Games Sales Dataset</h2>
+            <div class="row g-4 mt-1">
+                <div class="col-lg-6">
+                    <p>The dataset contains <strong>16,719 video games</strong> with sales data as of December 2016, sourced from VGChartz. It includes games across 31 platforms spanning multiple console generations.</p>
+                    <p>After filtering to the three major platform families and cleaning missing values, the working dataset contains <strong>{{ dataset_size }} games</strong> with complete information.</p>
+                    <p class="mb-0"><strong>Source:</strong> Kaggle &mdash; Video Games Sales as at 22 Dec 2016</p>
+                </div>
+                <div class="col-lg-6">
+                    <div class="info-box-white">
+                        <h5 style="font-size:0.9rem; margin-bottom:1rem;">Dataset Summary</h5>
+                        <table class="table-clean">
+                            <thead><tr><th>Attribute</th><th>Value</th></tr></thead>
+                            <tbody>
+                                <tr><td>Total records (original)</td><td>16,719</td></tr>
+                                <tr><td>Records after cleaning</td><td>{{ dataset_size }}</td></tr>
+                                <tr><td>Training set</td><td>{{ train_size }} (80%)</td></tr>
+                                <tr><td>Test set</td><td>{{ test_size }} (20%)</td></tr>
+                                <tr><td>Number of features</td><td>18 (6 numeric + 12 genre dummies)</td></tr>
+                                <tr><td>Target classes</td><td>3 (PlayStation, Xbox, Nintendo)</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Variables Used -->
+    <section class="section">
+        <div class="container fade-up">
+            <div class="section-label">Variables</div>
+            <h2 style="font-size:1.6rem; margin-bottom:1.5rem;">Input Variables and Target</h2>
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="info-box">
+                        <h5 style="font-size:0.95rem;">Features (Input Variables)</h5>
+                        <table class="table-clean mt-3">
+                            <thead><tr><th>Feature</th><th>Type</th><th>Description</th></tr></thead>
+                            <tbody>
+                                <tr><td><strong>NA_Sales</strong></td><td>Numeric</td><td>North America sales (millions)</td></tr>
+                                <tr><td><strong>EU_Sales</strong></td><td>Numeric</td><td>Europe sales (millions)</td></tr>
+                                <tr><td><strong>JP_Sales</strong></td><td>Numeric</td><td>Japan sales (millions)</td></tr>
+                                <tr><td><strong>Other_Sales</strong></td><td>Numeric</td><td>Rest of world sales (millions)</td></tr>
+                                <tr><td><strong>Critic_Score</strong></td><td>Numeric</td><td>Metacritic score (0-100)</td></tr>
+                                <tr><td><strong>User_Score</strong></td><td>Numeric</td><td>User score (0-10)</td></tr>
+                                <tr><td><strong>Genre</strong></td><td>Categorical</td><td>12 genres, one-hot encoded</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="info-box" style="border-left:3px solid #db2777;">
+                        <h5 style="font-size:0.95rem;">Target Variable</h5>
+                        <p class="mt-2" style="font-size:0.9rem;"><strong>Platform_Family</strong></p>
+                        <p style="font-size:0.88rem;">Three classes:</p>
+                        <ul style="font-size:0.88rem; color:var(--text-secondary);">
+                            <li><strong>PlayStation</strong> (PS, PS2, PS3, PS4, PSP, PSV)</li>
+                            <li><strong>Xbox</strong> (XB, X360, XOne)</li>
+                            <li><strong>Nintendo</strong> (Wii, WiiU, DS, 3DS, GBA, GC, N64, SNES, NES, GB)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Data Preparation -->
+    <section class="section section-alt">
+        <div class="container fade-up">
+            <div class="section-label">Methodology</div>
+            <h2 style="font-size:1.6rem; margin-bottom:2rem;">Data Preparation Steps</h2>
+            <div style="max-width:640px;">
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h5>Map Platforms to Families</h5>
+                        <p>Group 19 individual platforms into 3 families: PlayStation, Xbox, and Nintendo. Discard platforms that do not belong to these families (PC, retro consoles, etc.).</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h5>Clean Missing Data</h5>
+                        <p>Convert User_Score from string to numeric (removing "tbd" entries). Drop rows with missing Critic_Score, User_Score, or Genre values.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h5>Encode Categorical Variables</h5>
+                        <p>Apply one-hot encoding to the Genre column, creating 12 binary features (one per genre). Encode the target variable using LabelEncoder.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h5>Scale Numeric Features</h5>
+                        <p>Apply StandardScaler to normalize all features to zero mean and unit variance, ensuring the model treats all features equally.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h5>Train/Test Split (80/20)</h5>
+                        <p>Split the dataset into 80% training and 20% testing with stratification to preserve class proportions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Model Training -->
+    <section class="section">
+        <div class="container fade-up">
+            <div class="section-label">Training</div>
+            <h2 style="font-size:1.6rem; margin-bottom:1rem;">Model Training Process</h2>
+            <div class="info-box mt-4">
+                <p>The model uses <strong>scikit-learn's LogisticRegression</strong> with the following configuration:</p>
+                <ul style="color:var(--text-secondary); line-height:2;">
+                    <li><strong>max_iter=1000</strong> &mdash; Maximum iterations for the solver to converge</li>
+                    <li><strong>class_weight='balanced'</strong> &mdash; Automatically adjusts weights to handle the class imbalance (Xbox has fewer samples than PlayStation and Nintendo)</li>
+                    <li><strong>random_state=42</strong> &mdash; Ensures reproducible results</li>
+                </ul>
+                <p class="mb-0">The model learns a set of coefficients (weights) for each feature and each class. During prediction, it computes probabilities for all three classes and assigns the game to the class with the highest probability.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Prediction Form -->
+    <section class="section section-alt">
+        <div class="container fade-up">
+            <div class="section-label">Prediction</div>
+            <h2 style="font-size:1.6rem; margin-bottom:1.5rem;">Predict Platform Family</h2>
+            <div class="row g-4">
+                <div class="col-lg-7">
+                    <div class="predict-form">
+                        <form method="POST">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label>Genre</label>
+                                    <select name="genre" class="form-select" required>
+                                        {% for g in genres %}
+                                        <option value="{{ g }}">{{ g }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label>Critic Score (0-100)</label>
+                                    <input type="number" name="critic_score" class="form-control" min="0" max="100" step="1" value="75" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label>User Score (0-10)</label>
+                                    <input type="number" name="user_score" class="form-control" min="0" max="10" step="0.1" value="7.5" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label>NA Sales (millions)</label>
+                                    <input type="number" name="na_sales" class="form-control" min="0" step="0.01" value="1.0" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label>EU Sales (millions)</label>
+                                    <input type="number" name="eu_sales" class="form-control" min="0" step="0.01" value="0.5" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label>JP Sales (millions)</label>
+                                    <input type="number" name="jp_sales" class="form-control" min="0" step="0.01" value="0.2" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label>Other Sales (millions)</label>
+                                    <input type="number" name="other_sales" class="form-control" min="0" step="0.01" value="0.1" required>
+                                </div>
+                                <div class="col-12 mt-2">
+                                    <button type="submit" class="btn-main btn-main-fill w-100" style="justify-content:center;">Predict Platform &rarr;</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    {% if result %}
+                    <div class="result-box">
+                        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.5rem;">Predicted Platform Family</p>
+                        <div class="result-platform">{{ result }}</div>
+                        <hr style="border-color:rgba(79,110,247,0.15); margin:1.2rem 0;">
+                        <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:0.5rem;">Class Probabilities</p>
+                        {% for cls, prob in probabilities.items() %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span style="font-size:0.88rem; font-weight:600;">{{ cls }}</span>
+                            <span style="font-size:0.88rem; font-family:'JetBrains Mono',monospace;">{{ "%.1f"|format(prob * 100) }}%</span>
+                        </div>
+                        <div style="height:6px; background:var(--border-light); border-radius:50px; overflow:hidden; margin-bottom:0.8rem;">
+                            <div style="height:100%; width:{{ (prob * 100)|round|int }}%; background:var(--accent); border-radius:50px;"></div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="info-box text-center" style="display:flex; align-items:center; justify-content:center; min-height:300px;">
+                        <div>
+                            <p style="font-size:1.5rem; margin-bottom:0.5rem;">&#127918;</p>
+                            <p class="mb-0" style="font-size:0.9rem;">Fill in the form and click <strong>Predict</strong> to see which platform family the game most likely belongs to.</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Confusion Matrix -->
+    <section class="section">
+        <div class="container fade-up">
+            <div class="section-label">Evaluation</div>
+            <h2 style="font-size:1.6rem; margin-bottom:1.5rem;">Confusion Matrix</h2>
+            <div class="row g-4">
+                <div class="col-lg-7">
+                    <div class="graph-container">
+                        <img src="{{ url_for('static', filename='logistic_confusion_matrix.png') }}" alt="Confusion Matrix - Console Wars">
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="info-box">
+                        <h5 style="font-size:0.95rem;">How to Read the Confusion Matrix</h5>
+                        <p style="font-size:0.88rem;">Each row represents the <strong>actual</strong> class and each column represents the <strong>predicted</strong> class. The diagonal values (top-left to bottom-right) show correct predictions.</p>
+                        <p style="font-size:0.88rem;" class="mb-0">Off-diagonal values show misclassifications. For example, if the Nintendo-Xbox cell has a high value, it means many Nintendo games were incorrectly classified as Xbox games.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Classification Metrics -->
+    <section class="section section-alt">
+        <div class="container fade-up">
+            <div class="section-label">Metrics</div>
+            <h2 style="font-size:1.6rem; margin-bottom:1.5rem;">Classification Evaluation Metrics</h2>
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">{{ "%.1f"|format(accuracy * 100) }}%</div>
+                        <div class="metric-label">Accuracy</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">{{ "%.1f"|format(precision * 100) }}%</div>
+                        <div class="metric-label">Precision</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">{{ "%.1f"|format(recall * 100) }}%</div>
+                        <div class="metric-label">Recall</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">{{ "%.1f"|format(f1 * 100) }}%</div>
+                        <div class="metric-label">F1-Score</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="info-box">
+                        <h5 style="font-size:0.95rem;">What Each Metric Means</h5>
+                        <table class="table-clean mt-3">
+                            <tbody>
+                                <tr><td><strong>Accuracy</strong></td><td>Percentage of all predictions that are correct</td></tr>
+                                <tr><td><strong>Precision</strong></td><td>Of all games predicted as class X, how many actually belong to X</td></tr>
+                                <tr><td><strong>Recall</strong></td><td>Of all games that actually belong to class X, how many were correctly identified</td></tr>
+                                <tr><td><strong>F1-Score</strong></td><td>Harmonic mean of precision and recall, balancing both metrics</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="info-box">
+                        <h5 style="font-size:0.95rem;">Metrics Interpretation</h5>
+                        <p style="font-size:0.88rem;">The model achieves <strong>{{ "%.1f"|format(accuracy * 100) }}% accuracy</strong>, meaning it correctly classifies approximately {{ (accuracy * 10)|round|int }} out of every 10 games.</p>
+                        <p style="font-size:0.88rem;">PlayStation games are the easiest to classify due to their distinctive sales patterns, while Nintendo and Xbox games sometimes get confused due to overlapping characteristics.</p>
+                        <p style="font-size:0.88rem;" class="mb-0">The <strong>balanced class weights</strong> help the model perform fairly across all three classes despite Xbox having fewer samples in the dataset.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ROC Curve -->
+    <section class="section">
+        <div class="container fade-up">
+            <div class="section-label">ROC Analysis</div>
+            <h2 style="font-size:1.6rem; margin-bottom:1.5rem;">ROC Curves and AUC</h2>
+            <div class="row g-4">
+                <div class="col-lg-7">
+                    <div class="graph-container">
+                        <img src="{{ url_for('static', filename='logistic_roc_curve.png') }}" alt="ROC Curves - Console Wars">
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="info-box">
+                        <h5 style="font-size:0.95rem;">Understanding ROC and AUC</h5>
+                        <p style="font-size:0.88rem;"><strong>ROC</strong> (Receiver Operating Characteristic) curve plots the True Positive Rate vs False Positive Rate at various classification thresholds.</p>
+                        <p style="font-size:0.88rem;"><strong>AUC</strong> (Area Under the Curve) summarizes the ROC curve into a single number between 0 and 1. An AUC of 1.0 means perfect classification, while 0.5 means no better than random guessing.</p>
+                        <p style="font-size:0.88rem;" class="mb-0">Since this is a multiclass problem, we use the <strong>One-vs-Rest (OvR)</strong> approach: one ROC curve is computed per class, treating it as a binary problem against all other classes.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interpretation -->
+    <section class="section section-alt">
+        <div class="container fade-up">
+            <div class="section-label">Analysis</div>
+            <h2 style="font-size:1.6rem; margin-bottom:1rem;">Interpretation of Results</h2>
+            <div class="info-box mt-4">
+                <p><strong>Regional sales patterns are the strongest predictors.</strong> Japanese sales (JP_Sales) are a strong indicator for Nintendo games, as Nintendo has historically dominated the Japanese market. North American sales tend to be higher for Xbox titles, reflecting the brand's popularity in the US market.</p>
+                <p><strong>Genre plays a meaningful role.</strong> Certain genres like Platform and Role-Playing games are more common on Nintendo consoles, while Shooter and Sports games have stronger associations with PlayStation and Xbox.</p>
+                <p><strong>The model handles class imbalance well.</strong> Despite Xbox having fewer games in the dataset, the balanced class weights ensure the model does not simply default to predicting the majority class.</p>
+                <p class="mb-0"><strong>Limitations:</strong> The model uses a linear decision boundary, which may not capture complex non-linear relationships. Some games are genuinely multi-platform, making platform prediction inherently challenging. The dataset only covers sales up to 2016, so recent trends are not reflected.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="text-center">
+        <div class="container">
+            <p class="mb-1"><strong>Machine Learning applied to Video Games</strong></p>
+            <p class="mb-1" style="font-size:0.85rem;">Duvan Lozano Romero &mdash; Systems Engineering</p>
+            <p class="mb-0" style="font-size:0.8rem;">Universidad de Cundinamarca &mdash; Extension Chia &mdash; 2026</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const obs = new IntersectionObserver(entries => {
+            entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+        }, {threshold:0.1});
+        document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+    </script>
+</body>
+</html>
