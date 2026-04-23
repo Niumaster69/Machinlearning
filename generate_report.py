@@ -569,24 +569,23 @@ add_para(doc, "https://github.com/Niumaster69/Machinlearning")
 
 add_heading(doc, "6.2 Branch Used", 2)
 add_table(doc,
-    ["Branch", "Purpose", "Status"],
-    [("activityClouster", "Activity 3 — Unsupervised Learning (K-Means Clustering)",
-      "[ fill in commit count after final push ]")],
+    ["Branch", "Purpose", "Commits"],
+    [("activityClouster", "Activity 3 — Unsupervised Learning (K-Means Clustering)", "6")],
     widths=[4.5, 7.5, 4.0],
 )
 add_spacer(doc)
 
 add_heading(doc, "6.3 Evidence of Commits", 2)
-add_para(doc, "Representative commits on branch activityClouster (fill in the final hashes after pushing):", italic=True)
+add_para(doc, "Progressive commits on branch activityClouster:")
 add_table(doc,
     ["Commit", "Description"],
     [
-        ("[ hash ]", "add Clustering.py with manual + sklearn K-Means"),
-        ("[ hash ]", "add unsupervised learning basic concepts page"),
-        ("[ hash ]", "add K-Means manual exercise page with iteration tables"),
-        ("[ hash ]", "add clustering application page with scatter plot"),
-        ("[ hash ]", "add unsupervised routes to Flask app"),
-        ("[ hash ]", "update navbar across all templates with Unsupervised Learning menu"),
+        ("3265ce5", "add Clustering module with manual and sklearn K-Means"),
+        ("3550287", "add unsupervised learning basic concepts page"),
+        ("d5248bd", "add K-Means manual exercise page with iteration tables"),
+        ("817426c", "add clustering application page with scatter plot"),
+        ("9ded6ed", "add unsupervised routes and update navbar across all pages"),
+        ("293b774", "add Activity 3 report document and generator"),
     ],
     widths=[3.5, 12.5],
 )
