@@ -4,6 +4,7 @@ import LogisticRegressionModel
 import SteamLinearRegression
 import ConsoleWarsLogisticRegression
 import RatingKNNClassifier
+import Clustering
 
 app = Flask(__name__)
 #py -m flask run
@@ -125,3 +126,15 @@ def knn_application():
         test_size=RatingKNNClassifier.test_size,
         k_value=RatingKNNClassifier.K_VALUE,
     )
+
+@app.route('/unsupervised/concepts')
+def unsupervised_concepts():
+    return render_template('unsupervised_concepts.html')
+
+@app.route('/unsupervised/manual')
+def unsupervised_manual():
+    return render_template('kmeans_manual.html', manual=Clustering.manual_result)
+
+@app.route('/unsupervised/application')
+def unsupervised_application():
+    return render_template('clustering_application.html', app=Clustering.app_result)
