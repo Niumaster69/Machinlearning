@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unsupervised Learning - Basic Concepts</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #7c3aed;
+            --accent-soft: #f5f3ff;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --bg: #ffffff;
+            --bg-alt: #f8fafc;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; color:var(--text); background:var(--bg); overflow-x:hidden; }
+        h1,h2,h3,h4,h5,h6 { font-weight:700; letter-spacing:-0.025em; }
+        p { line-height:1.75; color:var(--text-secondary); }
+
+        .navbar { background:rgba(255,255,255,0.92)!important; backdrop-filter:blur(24px); border-bottom:1px solid var(--border); padding:0.9rem 0; z-index:1050; }
+        .navbar-brand { font-weight:800; font-size:1rem; color:var(--text)!important; letter-spacing:-0.04em; }
+        .nav-link { color:var(--text-secondary)!important; font-weight:500; font-size:0.85rem; padding:0.5rem 1rem!important; transition:color 0.2s; }
+        .nav-link:hover,.nav-link.active { color:var(--accent)!important; }
+        .dropdown-menu { background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:0.5rem; min-width:230px; box-shadow:0 12px 32px rgba(0,0,0,0.08); }
+        .dropdown-item { color:var(--text-secondary); border-radius:10px; padding:0.65rem 1rem; font-size:0.85rem; transition:background 0.15s; }
+        .dropdown-item:hover { background:var(--accent-soft); color:var(--accent); }
+        .dropdown-item small { color:var(--text-muted); }
+
+        .hero-page { background:linear-gradient(135deg, #f5f3ff 0%, #f8fafc 100%); padding:8rem 0 4rem; position:relative; overflow:hidden; }
+        .hero-page::before { content:''; position:absolute; top:-30%; right:-10%; width:500px; height:500px; background:radial-gradient(circle,rgba(124,58,237,0.08),transparent 65%); animation:drift 18s ease-in-out infinite; }
+        @keyframes drift { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-20px,-15px)} }
+        .hero-page h1 { font-size:clamp(1.8rem,4vw,2.8rem); color:var(--text); font-weight:800; line-height:1.15; }
+        .hero-page h1 span { color:var(--accent); }
+        .hero-page p { color:var(--text-secondary); font-size:1.05rem; }
+        .badge-line { display:inline-block; color:var(--text-muted); font-size:0.75rem; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:1.2rem; border-left:2px solid var(--accent); padding-left:0.75rem; }
+
+        .section { padding:5rem 0; }
+        .section-alt { background:var(--bg-alt); }
+        .section-label { text-transform:uppercase; font-weight:600; font-size:0.75rem; letter-spacing:0.12em; color:var(--accent); margin-bottom:0.6rem; }
+        .section-title { font-size:1.65rem; margin-bottom:0.5rem; }
+        .section-sub { color:var(--text-muted); font-size:0.95rem; margin-bottom:2.5rem; }
+
+        .card-clean { background:var(--bg); border:1px solid var(--border); border-radius:16px; padding:2rem; transition:all 0.3s ease; height:100%; }
+        .card-clean:hover { transform:translateY(-3px); box-shadow:0 16px 40px rgba(0,0,0,0.06); border-color:var(--accent); }
+
+        .info-box { background:var(--bg-alt); border:1px solid var(--border); border-radius:16px; padding:2rem; margin-bottom:2rem; }
+
+        .equation-box { background:var(--accent-soft); border:1px solid rgba(124,58,237,0.15); border-radius:14px; padding:1.8rem; text-align:center; margin:1.5rem 0; }
+        .equation-box .equation { font-family:'JetBrains Mono',monospace; font-size:1.2rem; font-weight:700; color:var(--accent); }
+        .equation-box .equation-label { font-size:0.78rem; color:var(--text-muted); margin-top:0.5rem; font-weight:500; }
+
+        .tag { display:inline-block; padding:0.2rem 0.7rem; border-radius:50px; font-size:0.72rem; font-weight:600; letter-spacing:0.04em; }
+        .tag-purple { background:#f5f3ff; color:#7c3aed; }
+        .tag-blue { background:#eef1fe; color:#4f6ef7; }
+        .tag-green { background:#ecfdf5; color:#059669; }
+        .tag-amber { background:#fef3c7; color:#d97706; }
+        .tag-red { background:#fef2f2; color:#dc2626; }
+
+        .table-clean { width:100%; border-collapse:collapse; }
+        .table-clean th { background:var(--accent-soft); color:var(--accent); font-weight:600; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.06em; padding:0.9rem 1rem; text-align:left; }
+        .table-clean td { padding:0.8rem 1rem; border-bottom:1px solid var(--border-light); font-size:0.93rem; color:var(--text-secondary); }
+        .table-clean tbody tr:hover { background:var(--bg-alt); }
+
+        .step-item { display:flex; gap:1.2rem; margin-bottom:1.5rem; }
+        .step-number { width:36px; height:36px; border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.8rem; flex-shrink:0; }
+        .step-content h5 { font-size:0.95rem; margin-bottom:0.3rem; }
+        .step-content p { font-size:0.88rem; margin-bottom:0; }
+
+        .btn-main { display:inline-flex; align-items:center; gap:0.5rem; padding:0.7rem 1.4rem; border-radius:10px; font-weight:600; font-size:0.85rem; text-decoration:none; transition:all 0.2s; border:1.5px solid var(--accent); color:var(--accent); background:transparent; }
+        .btn-main:hover { background:var(--accent); color:#fff; }
+        .btn-main-fill { background:var(--accent); color:#fff; border-color:var(--accent); }
+        .btn-main-fill:hover { background:#6d28d9; color:#fff; }
+
+        footer { background:var(--bg-alt); border-top:1px solid var(--border); color:var(--text-muted); padding:3rem 0; }
+
+        .fade-up { opacity:0; transform:translateY(25px); transition:all 0.5s ease; }
+        .fade-up.visible { opacity:1; transform:translateY(0); }
+
+        @media(max-width:767px) { .section { padding:3.5rem 0; } .hero-page { padding:7rem 0 3rem; } }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">Machine Learning</a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/use-cases">Use Cases</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Linear Regression</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/linear-regression/concepts">Basic Concepts</a></li>
+                            <li><a class="dropdown-item" href="/linear-regression/application">Application</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Logistic Regression</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/logistic-regression/concepts">Basic Concepts</a></li>
+                            <li><a class="dropdown-item" href="/logistic-regression/application">Application</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">KNN</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/knn/concepts">Basic Concepts</a></li>
+                            <li><a class="dropdown-item" href="/knn/application">Application</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">Unsupervised Learning</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/unsupervised/concepts" style="background:var(--accent-soft);">Basic Concepts</a></li>
+                            <li><a class="dropdown-item" href="/unsupervised/manual">K-Means Manual Exercise</a></li>
+                            <li><a class="dropdown-item" href="/unsupervised/application">Clustering Application</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero-page">
+        <div class="container position-relative" style="z-index:2;">
+            <div class="badge-line">Unsupervised Learning &mdash; Basic Concepts</div>
+            <h1>Finding Hidden<br><span>Patterns in Data</span></h1>
+            <p class="mt-3" style="max-width:600px;">Understanding unsupervised learning, clustering, and the K-Means algorithm &mdash; the tools that let machines discover structure in data without any labels.</p>
+        </div>
+    </section>
+
+    <!-- Unsupervised Learning -->
+    <section class="section">
+        <div class="container fade-up">
+            <div class="section-label">Definition</div>
+            <h2 class="section-title">What is Unsupervised Learning?</h2>
+            <div class="info-box mt-4">
+                <p><strong>Unsupervised learning</strong> is a branch of machine learning where the algorithm receives only input data, without any labels or expected outputs. Instead of being told what the correct answer is, the model must discover the underlying structure of the data on its own.</p>
+                <p>This contrasts with supervised learning &mdash; where algorithms such as Linear Regression, Logistic Regression, and KNN learn from labeled examples (games with known ratings, games with known sales, etc.).</p>
+                <p class="mb-0">In the video game industry, unsupervised learning is used to <strong>segment players</strong>, <strong>group similar games</strong>, <strong>detect anomalies</strong> such as cheaters or bots, and <strong>compress data</strong> for recommendation systems.</p>
+            </div>
+            <div class="row g-4 mt-2">
+                <div class="col-md-6">
+                    <div class="card-clean">
+                        <span class="tag tag-blue">Supervised</span>
+                        <h5 class="mt-3" style="font-size:1.05rem;">Learns from labels</h5>
+                        <p class="mb-0" style="font-size:0.9rem;">Input &rarr; Output pairs. The algorithm minimizes the prediction error against known answers.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card-clean">
+                        <span class="tag tag-purple">Unsupervised</span>
+                        <h5 class="mt-3" style="font-size:1.05rem;">Learns from structure</h5>
+                        <p class="mb-0" style="font-size:0.9rem;">Input only. The algorithm finds groups, patterns, or compressed representations by itself.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Clustering -->
+    <section class="section section-alt">
+        <div class="container fade-up">
+            <div class="section-label">Core Task</div>
+            <h2 class="section-title">What is Clustering?</h2>
+            <div class="info-box mt-4">
+                <p><strong>Clustering</strong> is the most common unsupervised learning task. Its goal is to <strong>partition a dataset into groups</strong> (called <em>clusters</em>) such that items within the same group are more similar to each other than to items in other groups.</p>
+                <p>Similarity is measured with a <strong>distance metric</strong> (usually Euclidean distance). Points that are close together in the feature space get assigned to the same cluster; points that are far apart end up in different clusters.</p>
+                <p class="mb-0">There is no ground truth to compare against &mdash; the algorithm defines what a "good" clustering looks like through a mathematical criterion (typically minimizing the variance inside each cluster).</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- K-Means -->
+    <section class="section">
+        <div class="container fade-up">
+            <div class="section-label">Algorithm</div>
+            <h2 class="section-title">What is K-Means?</h2>
+            <div class="info-box mt-4">
+                <p><strong>K-Means</strong> is the most widely used clustering algorithm. It partitions a dataset into <strong>K clusters</strong>, where K is chosen by the user before training. Each cluster is represented by its <strong>centroid</strong> &mdash; the mean of all points assigned to that cluster.</p>
+                <p>The algorithm iteratively refines the position of the centroids and the assignments of the points until the clustering stops changing (convergence) or a maximum number of iterations is reached.</p>
+                <p class="mb-0">K-Means is simple, fast, and scales well to large datasets, which is why it is the default choice for most segmentation problems.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Concepts -->
+    <section class="section section-alt">
+        <div class="container fade-up">
+            <div class="section-label">Building Blocks</div>
+            <h2 class="section-title">Key Concepts</h2>
+            <p class="section-sub">The main ideas behind the K-Means algorithm</p>
+
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card-clean">
+                        <span class="tag tag-purple">Concept</span>
+                        <h5 class="mt-3">Centroids</h5>
+                        <p class="mb-0" style="font-size:0.9rem;">A centroid is the <strong>geometric center</strong> of a cluster &mdash; the arithmetic mean of all the points that belong to it. In a 2-feature problem, a centroid is a point <code>(x, y)</code>; with more features, it is a vector of means.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card-clean">
+                        <span class="tag tag-purple">Concept</span>
+                        <h5 class="mt-3">Distance Metric</h5>
+                        <p class="mb-0" style="font-size:0.9rem;">K-Means uses <strong>Euclidean distance</strong> to measure how far a data point is from each centroid. The point is then assigned to the cluster whose centroid is closest.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card-clean">
+                        <span class="tag tag-purple">Concept</span>
+                        <h5 class="mt-3">Variance (WCSS)</h5>
+                        <p class="mb-0" style="font-size:0.9rem;">The <strong>Within-Cluster Sum of Squares</strong> is the sum of squared distances from each point to its assigned centroid. K-Means aims to <strong>minimize</strong> this quantity &mdash; smaller WCSS means tighter, more compact clusters.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card-clean">
+                        <span class="tag tag-purple">Concept</span>
+                        <h5 class="mt-3">Convergence</h5>
+                        <p class="mb-0" style="font-size:0.9rem;">The algorithm has converged when the centroids stop moving (or move very little) between iterations. At that point, further updates no longer reduce the variance in a meaningful way.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Euclidean Distance Formula -->
+    <section class="section">
+        <div class="container fade-up">
+            <div class="section-label">Math</div>
+            <h2 class="section-title">Euclidean Distance Formula</h2>
+            <p>The distance between a data point <strong>P = (x<sub>1</sub>, y<sub>1</sub>)</strong> and a centroid <strong>C = (x<sub>2</sub>, y<sub>2</sub>)</strong> is:</p>
+            <div class="equation-box">
+                <div class="equation">d(P, C) = &radic;( (x<sub>1</sub> &minus; x<sub>2</sub>)&sup2; + (y<sub>1</sub> &minus; y<sub>2</sub>)&sup2; )</div>
+                <div class="equation-label">Euclidean Distance &mdash; Straight-line distance in 2D space</div>
+            </div>
+            <p>For higher dimensions, the formula extends naturally by adding one squared difference per feature before taking the square root.</p>
+            <div class="equation-box">
+                <div class="equation">WCSS = &Sigma; &Sigma; d(x<sub>i</sub>, c<sub>k</sub>)&sup2;</div>
+                <div class="equation-label">Within-Cluster Sum of Squares (the value K-Means minimizes)</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Iterative Process -->
+    <section class="section section-alt">
+        <div class="container fade-up">
+            <div class="section-label">How it works</div>
+            <h2 class="section-title">The Iterative Process</h2>
+            <p class="section-sub">K-Means refines its solution through a loop of four steps</p>
+
+            <div style="max-width:700px;">
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h5>Initialize Centroids</h5>
+                        <p>Choose K initial centroid positions. They can be random, picked manually, or selected by a smarter strategy like K-Means++. In our manual exercise we pick them by hand, spread across the data range.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h5>Assign Points to the Nearest Centroid</h5>
+                        <p>For every data point, compute the Euclidean distance to each of the K centroids. Assign the point to the cluster whose centroid is the closest.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h5>Recalculate Centroids</h5>
+                        <p>Once every point has been assigned, the new centroid of each cluster is the mean of all points inside it. Centroids "move" toward the center of their group.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h5>Repeat Until Convergence</h5>
+                        <p>Go back to step 2 with the updated centroids. Repeat until centroid positions stop changing or until a maximum number of iterations is reached. The total variance (WCSS) decreases on every iteration.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Convergence -->
+    <section class="section">
+        <div class="container fade-up">
+            <div class="section-label">Behavior</div>
+            <h2 class="section-title">Variance and Convergence</h2>
+            <div class="info-box mt-4">
+                <p>At each iteration, K-Means decreases (or keeps equal) the value of the <strong>WCSS</strong>. Points are reassigned to closer centroids, and centroids move to the average position of their new members &mdash; both operations can only reduce the overall variance.</p>
+                <p>When the algorithm reaches a point where <strong>no point changes cluster</strong> between iterations, the centroids also stop moving. This is called <strong>convergence</strong>. K-Means is guaranteed to converge in a finite number of steps, though it may reach a local minimum rather than the global optimum.</p>
+                <p class="mb-0">A good clustering is one where WCSS is small (tight clusters) and the clusters are well separated from each other. Plotting WCSS across iterations produces a monotonically decreasing curve that flattens near the converged value.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Real-world applications -->
+    <section class="section section-alt">
+        <div class="container fade-up">
+            <div class="section-label">Applications</div>
+            <h2 class="section-title">Real-World Applications</h2>
+            <p class="section-sub">Where unsupervised learning makes an impact</p>
+
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="card-clean">
+                        <span class="tag tag-blue">Gaming</span>
+                        <h5 class="mt-3" style="font-size:1.05rem;">Player Segmentation</h5>
+                        <p class="mb-0" style="font-size:0.88rem;">Studios group players by behavior (casual, competitive, whales, explorers) to design balanced matchmaking and tailored content.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card-clean">
+                        <span class="tag tag-green">E-commerce</span>
+                        <h5 class="mt-3" style="font-size:1.05rem;">Customer Segmentation</h5>
+                        <p class="mb-0" style="font-size:0.88rem;">Retailers cluster customers by purchase history to target promotions, recommend products, and estimate lifetime value.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card-clean">
+                        <span class="tag tag-amber">Security</span>
+                        <h5 class="mt-3" style="font-size:1.05rem;">Anomaly Detection</h5>
+                        <p class="mb-0" style="font-size:0.88rem;">Points that do not fit into any cluster (or fall into tiny clusters) are often outliers &mdash; useful for detecting fraud, cheats, and intrusions.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card-clean">
+                        <span class="tag tag-red">Healthcare</span>
+                        <h5 class="mt-3" style="font-size:1.05rem;">Patient Subtypes</h5>
+                        <p class="mb-0" style="font-size:0.88rem;">Clustering identifies groups of patients with similar symptoms, enabling personalized treatment plans and clinical research stratification.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card-clean">
+                        <span class="tag tag-purple">Marketing</span>
+                        <h5 class="mt-3" style="font-size:1.05rem;">Market Basket Analysis</h5>
+                        <p class="mb-0" style="font-size:0.88rem;">Clustering products by co-purchase patterns reveals natural groupings of items, driving store layout and cross-sell strategy.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card-clean">
+                        <span class="tag tag-blue">Vision</span>
+                        <h5 class="mt-3" style="font-size:1.05rem;">Image Compression</h5>
+                        <p class="mb-0" style="font-size:0.88rem;">K-Means on pixel colors reduces an image's palette to K representative colors, shrinking file size with minimal perceptual loss.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Advantages / Limitations -->
+    <section class="section">
+        <div class="container fade-up">
+            <div class="section-label">Trade-offs</div>
+            <h2 class="section-title">Advantages and Limitations</h2>
+            <div class="row g-4 mt-1">
+                <div class="col-md-6">
+                    <div class="info-box" style="border-left:3px solid #059669;">
+                        <h5 style="font-size:0.95rem; color:#059669;">Advantages</h5>
+                        <ul style="font-size:0.9rem; color:var(--text-secondary); line-height:2;" class="mb-0">
+                            <li>Simple to understand and implement</li>
+                            <li>Fast and scales well to large datasets</li>
+                            <li>Works with any number of features</li>
+                            <li>Gives interpretable centroids as group prototypes</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="info-box" style="border-left:3px solid #dc2626;">
+                        <h5 style="font-size:0.95rem; color:#dc2626;">Limitations</h5>
+                        <ul style="font-size:0.9rem; color:var(--text-secondary); line-height:2;" class="mb-0">
+                            <li>K (number of clusters) must be chosen beforehand</li>
+                            <li>Sensitive to the initial centroid positions</li>
+                            <li>Assumes spherical, similarly-sized clusters</li>
+                            <li>Affected by feature scale &mdash; requires standardization</li>
+                            <li>May converge to a local minimum (not global)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section section-alt">
+        <div class="container text-center fade-up">
+            <h2 style="font-size:1.6rem; margin-bottom:1rem;">Ready to see K-Means in action?</h2>
+            <p class="mb-4">Explore the manual step-by-step simulation or the full Flask application built on top of a video games dataset.</p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a href="/unsupervised/manual" class="btn-main">Manual Exercise &rarr;</a>
+                <a href="/unsupervised/application" class="btn-main btn-main-fill">Clustering Application &rarr;</a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="text-center">
+        <div class="container">
+            <p class="mb-1"><strong>Machine Learning applied to Video Games</strong></p>
+            <p class="mb-1" style="font-size:0.85rem;">Duvan Lozano Romero &mdash; Systems Engineering Student</p>
+            <p class="mb-0" style="font-size:0.8rem;">Universidad de Cundinamarca &mdash; Extension Chia &mdash; 2026</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const obs = new IntersectionObserver(entries => {
+            entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+        }, {threshold:0.1});
+        document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+    </script>
+</body>
+</html>

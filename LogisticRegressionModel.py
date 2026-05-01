@@ -1,6 +1,8 @@
 # 1. Importar librerias necesarias
 import numpy as np
 import pandas as pd
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.model_selection import train_test_split
@@ -49,7 +51,7 @@ sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', cbar=False)
 plt.xlabel('Predicted')
 plt.ylabel('Actual')
 plt.title('Confusion Matrix')
-plt.show()
+plt.close()
 
 # Imprimir el reporte de clasificacion
 print(classification_report(y_test, y_pred))

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clustering Application - Video Games</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #7c3aed;
+            --accent-soft: #f5f3ff;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --bg: #ffffff;
+            --bg-alt: #f8fafc;
+            --cluster-1: #4f6ef7;
+            --cluster-2: #dc2626;
+            --cluster-3: #d97706;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; color:var(--text); background:var(--bg); overflow-x:hidden; }
+        h1,h2,h3,h4,h5,h6 { font-weight:700; letter-spacing:-0.025em; }
+        p { line-height:1.75; color:var(--text-secondary); }
+
+        .navbar { background:rgba(255,255,255,0.92)!important; backdrop-filter:blur(24px); border-bottom:1px solid var(--border); padding:0.9rem 0; z-index:1050; }
+        .navbar-brand { font-weight:800; font-size:1rem; color:var(--text)!important; letter-spacing:-0.04em; }
+        .nav-link { color:var(--text-secondary)!important; font-weight:500; font-size:0.85rem; padding:0.5rem 1rem!important; transition:color 0.2s; }
+        .nav-link:hover,.nav-link.active { color:var(--accent)!important; }
+        .dropdown-menu { background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:0.5rem; min-width:230px; box-shadow:0 12px 32px rgba(0,0,0,0.08); }
+        .dropdown-item { color:var(--text-secondary); border-radius:10px; padding:0.65rem 1rem; font-size:0.85rem; transition:background 0.15s; }
+        .dropdown-item:hover { background:var(--accent-soft); color:var(--accent); }
+
+        .hero-page { background:linear-gradient(135deg, #f5f3ff 0%, #f8fafc 100%); padding:8rem 0 4rem; position:relative; overflow:hidden; }
+        .hero-page::before { content:''; position:absolute; top:-30%; right:-10%; width:500px; height:500px; background:radial-gradient(circle,rgba(124,58,237,0.08),transparent 65%); animation:drift 18s ease-in-out infinite; }
+        @keyframes drift { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-20px,-15px)} }
+        .hero-page h1 { font-size:clamp(1.8rem,4vw,2.8rem); color:var(--text); font-weight:800; line-height:1.15; }
+        .hero-page h1 span { color:var(--accent); }
+        .hero-page p { color:var(--text-secondary); font-size:1.05rem; }
+        .badge-line { display:inline-block; color:var(--text-muted); font-size:0.75rem; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:1.2rem; border-left:2px solid var(--accent); padding-left:0.75rem; }
+
+        .section { padding:5rem 0; }
+        .section-alt { background:var(--bg-alt); }
+        .section-label { text-transform:uppercase; font-weight:600; font-size:0.75rem; letter-spacing:0.12em; color:var(--accent); margin-bottom:0.6rem; }
+
+        .info-box { background:var(--bg-alt); border:1px solid var(--border); border-radius:16px; padding:2rem; margin-bottom:2rem; }
+        .info-box-white { background:var(--bg); border:1px solid var(--border); border-radius:16px; padding:2rem; margin-bottom:2rem; }
+
+        .step-item { display:flex; gap:1.2rem; margin-bottom:1.5rem; }
+        .step-number { width:36px; height:36px; border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.8rem; flex-shrink:0; }
+        .step-content h5 { font-size:0.95rem; margin-bottom:0.3rem; }
+        .step-content p { font-size:0.88rem; margin-bottom:0; }
+
+        .table-wrap { max-height:420px; overflow-y:auto; border:1px solid var(--border-light); border-radius:10px; }
+        .table-clean { width:100%; border-collapse:collapse; }
+        .table-clean th { background:var(--accent-soft); color:var(--accent); font-weight:600; font-size:0.74rem; text-transform:uppercase; letter-spacing:0.05em; padding:0.8rem 1rem; text-align:left; position:sticky; top:0; z-index:2; }
+        .table-clean td { padding:0.7rem 1rem; border-bottom:1px solid var(--border-light); font-size:0.88rem; color:var(--text-secondary); }
+        .table-clean tbody tr:hover { background:var(--bg-alt); }
+        .mono { font-family:'JetBrains Mono',monospace; }
+
+        .cluster-badge { display:inline-block; padding:0.18rem 0.7rem; border-radius:50px; font-size:0.72rem; font-weight:700; letter-spacing:0.04em; color:#fff; }
+        .badge-1 { background:var(--cluster-1); }
+        .badge-2 { background:var(--cluster-2); }
+        .badge-3 { background:var(--cluster-3); }
+
+        .summary-card { background:var(--bg); border:1px solid var(--border); border-radius:16px; padding:1.8rem; border-top:4px solid var(--accent); height:100%; }
+        .summary-card.card-1 { border-top-color:var(--cluster-1); }
+        .summary-card.card-2 { border-top-color:var(--cluster-2); }
+        .summary-card.card-3 { border-top-color:var(--cluster-3); }
+        .summary-card h5 { font-size:1rem; margin-bottom:0.4rem; }
+        .summary-card .s-count { font-size:2rem; font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--text); line-height:1; margin:0.6rem 0 0.2rem; }
+        .summary-card .s-count-label { font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; }
+        .summary-card .stat-row { display:flex; justify-content:space-between; padding:0.45rem 0; border-bottom:1px solid var(--border-light); font-size:0.85rem; }
+        .summary-card .stat-row:last-child { border-bottom:none; }
+        .summary-card .stat-row strong { font-family:'JetBrains Mono',monospace; color:var(--text); }
+
+        .centroid-card { background:var(--bg-alt); border:1px solid var(--border); border-radius:14px; padding:1.1rem 1.3rem; display:flex; justify-content:space-between; align-items:center; }
+        .centroid-card.c-1 { border-left:4px solid var(--cluster-1); }
+        .centroid-card.c-2 { border-left:4px solid var(--cluster-2); }
+        .centroid-card.c-3 { border-left:4px solid var(--cluster-3); }
+        .centroid-card .c-label { font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; font-weight:600; margin-bottom:0.25rem; }
+        .centroid-card .c-coords { font-family:'JetBrains Mono', monospace; font-size:1.05rem; font-weight:700; color:var(--text); }
+
+        .graph-container { background:var(--bg); border:1px solid var(--border); border-radius:16px; padding:1.5rem; text-align:center; }
+        .graph-container img { width:100%; max-width:800px; border-radius:10px; }
+
+        .metric-card { text-align:center; padding:1.3rem; background:var(--bg); border:1px solid var(--border); border-radius:14px; }
+        .metric-value { font-size:1.8rem; font-weight:800; color:var(--accent); font-family:'JetBrains Mono',monospace; }
+        .metric-label { font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; margin-top:0.3rem; }
+
+        .tag { display:inline-block; padding:0.2rem 0.7rem; border-radius:50px; font-size:0.72rem; font-weight:600; letter-spacing:0.04em; }
+        .tag-purple { background:#f5f3ff; color:#7c3aed; }
+        .tag-blue { background:#eef1fe; color:#4f6ef7; }
+        .tag-green { background:#ecfdf5; color:#059669; }
+
+        footer { background:var(--bg-alt); border-top:1px solid var(--border); color:var(--text-muted); padding:3rem 0; }
+
+        .fade-up { opacity:0; transform:translateY(25px); transition:all 0.5s ease; }
+        .fade-up.visible { opacity:1; transform:translateY(0); }
+
+        @media(max-width:767px) { .section { padding:3.5rem 0; } .hero-page { padding:7rem 0 3rem; } }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">Machine Learning</a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/use-cases">Use Cases</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Linear Regression</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/linear-regression/concepts">Basic Concepts</a></li>
+                            <li><a class="dropdown-item" href="/linear-regression/application">Application</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Logistic Regression</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/logistic-regression/concepts">Basic Concepts</a></li>
+                            <li><a class="dropdown-item" href="/logistic-regression/application">Application</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">KNN</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/knn/concepts">Basic Concepts</a></li>
+                            <li><a class="dropdown-item" href="/knn/application">Application</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">Unsupervised Learning</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/unsupervised/concepts">Basic Concepts</a></li>
+                            <li><a class="dropdown-item" href="/unsupervised/manual">K-Means Manual Exercise</a></li>
+                            <li><a class="dropdown-item" href="/unsupervised/application" style="background:var(--accent-soft);">Clustering Application</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero-page">
+        <div class="container position-relative" style="z-index:2;">
+            <div class="badge-line">Unsupervised Learning &mdash; Clustering Application</div>
+            <h1>Segmenting Video Games<br><span>by Reception Profile</span></h1>
+            <p class="mt-3" style="max-width:620px;">A full scikit-learn K-Means pipeline applied to over 7,000 video games &mdash; discovering natural segments based on how critics and players rated them.</p>
+        </div>
+    </section>
+
+    <!-- Context -->
+    <section class="section">
+        <div class="container fade-up">
+            <div class="section-label">Context</div>
+            <h2 style="font-size:1.6rem; margin-bottom:1rem;">What does the data represent?</h2>
+            <div class="row g-4 mt-1">
+                <div class="col-lg-7">
+                    <p>The video game industry generates two different types of reception signal for every released title: the <strong>professional critics' opinion</strong> (Metacritic's Critic_Score) and the <strong>players' opinion</strong> (User_Score). These two signals often agree, but sometimes they diverge sharply &mdash; creating interesting market segments.</p>
+                    <p>A game that <strong>critics love but players dislike</strong>, or the opposite, is a very different commercial proposition from a game that <strong>both camps praise</strong> or <strong>both camps reject</strong>. Publishers, storefronts and recommendation engines benefit from identifying these segments automatically.</p>
+                    <p class="mb-0">This application uses <strong>K-Means clustering</strong> to discover, without any labels, how games group themselves when described only by their two reception scores.</p>
+                </div>
+                <div class="col-lg-5">
+                    <div class="info-box" style="border-left:3px solid var(--accent);">
+                        <h5 style="font-size:0.95rem;">Business Questions</h5>
+                        <ul style="font-size:0.88rem; color:var(--text-secondary); line-height:1.9;" class="mb-0">
+                            <li>Do critic- and user-reception patterns form natural groups?</li>
+                            <li>How many games fall in each group?</li>
+                            <li>What is the typical game inside each cluster?</li>
+                            <li>Can we characterize the segments to guide marketing?</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dataset -->
+    <section class="section section-alt">
+        <div class="container fade-up">
+            <div class="section-label">Dataset</div>
+            <h2 style="font-size:1.6rem; margin-bottom:1rem;">Video Games Sales Dataset</h2>
+            <div class="row g-4 mt-1">
+                <div class="col-lg-6">
+                    <p>The dataset comes from Kaggle (<em>Video Games Sales as at 22 Dec 2016</em>) and originally contains <strong>16,719 records</strong>. After removing games with missing or invalid Critic_Score, User_Score or Global_Sales values, the clean working set contains <strong>{{ app.dataset_size }} games</strong> &mdash; well above the activity's 1,000-record minimum.</p>
+                    <p><strong>Features used for clustering (2 numerical features):</strong></p>
+                    <ul style="color:var(--text-secondary); line-height:2;">
+                        <li><strong>Critic_Score</strong> &mdash; Metacritic critical rating (0&ndash;100)</li>
+                        <li><strong>User_Score</strong> &mdash; Players' rating (0&ndash;10)</li>
+                    </ul>
+                </div>
+                <div class="col-lg-6">
+                    <div class="info-box-white">
+                        <h5 style="font-size:0.9rem; margin-bottom:1rem;">Dataset Summary</h5>
+                        <table class="table-clean">
+                            <tbody>
+                                <tr><td>Total records (original)</td><td><strong>16,719</strong></td></tr>
+                                <tr><td>Records after cleaning</td><td><strong>{{ app.dataset_size }}</strong></td></tr>
+                                <tr><td>Features used</td><td><strong>2</strong> (Critic_Score, User_Score)</td></tr>
+                                <tr><td>Number of clusters (K)</td><td><strong>{{ app.n_clusters }}</strong></td></tr>
+                                <tr><td>Distance metric</td><td><strong>Euclidean</strong></td></tr>
+                                <tr><td>Source</td><td>Kaggle</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Preprocessing -->
+    <section class="section">
+        <div class="container fade-up">
+            <div class="section-label">Methodology</div>
+            <h2 style="font-size:1.6rem; margin-bottom:2rem;">Data Preprocessing &amp; Model Training</h2>
+            <div style="max-width:680px;">
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h5>Clean Missing Data</h5>
+                        <p>Convert <code>User_Score</code> to numeric (removing "tbd" entries) and drop rows where Critic_Score, User_Score or Global_Sales are missing. Keep only games with positive scores.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h5>Feature Selection</h5>
+                        <p>Build the feature matrix <code>X = [Critic_Score, User_Score]</code>. These two numerical features describe the reception profile of each game in a directly interpretable way.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h5>Feature Scaling (StandardScaler)</h5>
+                        <p>The two features live on different scales (0&ndash;100 vs 0&ndash;10). Apply <code>StandardScaler</code> to standardize them to zero mean and unit variance &mdash; essential for any distance-based algorithm like K-Means.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h5>Model Training</h5>
+                        <p>Fit <code>KMeans(n_clusters=3, random_state=42, n_init=10)</code> from scikit-learn. <code>n_init=10</code> runs K-Means 10 times with different seeds and keeps the best result, reducing the impact of a bad initialization.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h5>Post-processing</h5>
+                        <p>Inverse-transform the centroids back to the original feature space so they can be interpreted in real units (critic points on 0&ndash;100, user points on 0&ndash;10).</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Model Metrics -->
+    <section class="section section-alt">
+        <div class="container fade-up">
+            <div class="section-label">Training Result</div>
+            <h2 style="font-size:1.6rem; margin-bottom:1.5rem;">Model Statistics</h2>
+            <div class="row g-3">
+                <div class="col-6 col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">{{ app.dataset_size }}</div>
+                        <div class="metric-label">Records Clustered</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">{{ app.n_clusters }}</div>
+                        <div class="metric-label">Clusters (K)</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">{{ app.features|length }}</div>
+                        <div class="metric-label">Features</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">{{ app.inertia }}</div>
+                        <div class="metric-label">Inertia (WCSS)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cluster Summary -->
+    <section class="section">
+        <div class="container fade-up">
+            <div class="section-label">Results</div>
+            <h2 style="font-size:1.6rem; margin-bottom:1.5rem;">Cluster Summary</h2>
+            <div class="row g-4">
+                {% for s in app.summary %}
+                <div class="col-lg-4">
+                    <div class="summary-card card-{{ s.cluster }}">
+                        <span class="cluster-badge badge-{{ s.cluster }}">Cluster {{ s.cluster }}</span>
+                        <div class="s-count">{{ s.count }}</div>
+                        <div class="s-count-label">Games in cluster</div>
+                        <div class="mt-3">
+                            <div class="stat-row"><span>Avg. Critic_Score</span><strong>{{ s.avg_critic }}</strong></div>
+                            <div class="stat-row"><span>Avg. User_Score</span><strong>{{ s.avg_user }}</strong></div>
+                            <div class="stat-row"><span>Critic_Score range</span><strong>{{ s.min_critic }} &ndash; {{ s.max_critic }}</strong></div>
+                            <div class="stat-row"><span>User_Score range</span><strong>{{ s.min_user }} &ndash; {{ s.max_user }}</strong></div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Centroids -->
+    <section class="section section-alt">
+        <div class="container fade-up">
+            <div class="section-label">Centroids</div>
+            <h2 style="font-size:1.6rem; margin-bottom:1.5rem;">Final Cluster Centroids</h2>
+            <p class="mb-4">Centroid coordinates expressed in the original feature units (Critic_Score on 0&ndash;100, User_Score on 0&ndash;10).</p>
+            <div class="row g-3">
+                {% for c in app.centers %}
+                <div class="col-md-4">
+                    <div class="centroid-card c-{{ c.cluster }}">
+                        <div>
+                            <div class="c-label">Cluster {{ c.cluster }} Centroid</div>
+                            <div class="c-coords">({{ c.critic_score }}, {{ c.user_score }})</div>
+                        </div>
+                        <span class="cluster-badge badge-{{ c.cluster }}">C{{ c.cluster }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Scatter plot -->
+    <section class="section">
+        <div class="container fade-up">
+            <div class="section-label">Visualization</div>
+            <h2 style="font-size:1.6rem; margin-bottom:1.5rem;">Scatter Plot with Clusters and Centroids</h2>
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="graph-container">
+                        <img src="{{ url_for('static', filename='kmeans_scatter.png') }}" alt="K-Means scatter plot">
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="info-box-white">
+                        <h5 style="font-size:0.95rem; margin-bottom:1rem;">How to Read the Plot</h5>
+                        <p style="font-size:0.88rem;">Each point is a game, positioned by its Critic_Score (x-axis) and User_Score (y-axis). Colors indicate the cluster assigned by K-Means.</p>
+                        <p style="font-size:0.88rem;">The black <strong>X</strong> markers are the final centroids &mdash; the "prototype" game of each segment.</p>
+                        <p class="mb-0" style="font-size:0.88rem;">The diagonal trend reflects the well-known correlation between critics and players, while the three clusters split that diagonal into low, mid and high reception bands.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cluster assignment table -->
+    <section class="section section-alt">
+        <div class="container fade-up">
+            <div class="section-label">Cluster Assignments</div>
+            <h2 style="font-size:1.6rem; margin-bottom:0.8rem;">Sample of Games with their Assigned Cluster</h2>
+            <p class="mb-3" style="font-size:0.9rem;">Showing the first 30 games from the dataset and the cluster K-Means assigned to each of them.</p>
+            <div class="table-wrap">
+                <table class="table-clean">
+                    <thead>
+                        <tr>
+                            <th>Game</th>
+                            <th>Critic_Score</th>
+                            <th>User_Score</th>
+                            <th>Cluster</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in app.results %}
+                        <tr>
+                            <td>{{ r.name }}</td>
+                            <td class="mono">{{ r.critic_score }}</td>
+                            <td class="mono">{{ r.user_score }}</td>
+                            <td><span class="cluster-badge badge-{{ r.cluster }}">C{{ r.cluster }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interpretation -->
+    <section class="section">
+        <div class="container fade-up">
+            <div class="section-label">Analysis</div>
+            <h2 style="font-size:1.6rem; margin-bottom:1rem;">Interpretation of Results</h2>
+            <div class="info-box mt-4">
+                <p>K-Means identified <strong>three coherent segments</strong> that split games along the shared critic&ndash;user reception axis:</p>
+                <p><strong>Cluster 1 &mdash; Acclaimed titles:</strong> the largest segment, with high average Critic_Score and User_Score. Critics and players agree that these games are great &mdash; the hits and evergreens that justify a recommendation push.</p>
+                <p><strong>Cluster 2 &mdash; Solid mid-tier:</strong> the "safe bet" segment. Reception is decent but not remarkable. These games rely on genre loyalty or brand more than on buzz.</p>
+                <p><strong>Cluster 3 &mdash; Underperformers:</strong> the smallest segment, with low scores from both camps. These titles are good candidates for deep discounts or for filtering out of featured slots.</p>
+                <p><strong>Why K = 3 works well here:</strong> the three centroids are well separated along the critic&ndash;user diagonal, which means the clusters have clearly distinct profiles and the assignment is stable across runs.</p>
+                <p class="mb-0"><strong>Limitations:</strong> K-Means assumes roughly spherical clusters of similar size, which is only approximately true here. The mid-tier cluster overlaps with its neighbors at the boundaries, so games near the borders could plausibly belong to either side. Adding more features (genre, platform, sales) would refine the segmentation but also reduce visual interpretability.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="text-center">
+        <div class="container">
+            <p class="mb-1"><strong>Machine Learning applied to Video Games</strong></p>
+            <p class="mb-1" style="font-size:0.85rem;">Duvan Lozano Romero &mdash; Systems Engineering Student</p>
+            <p class="mb-0" style="font-size:0.8rem;">Universidad de Cundinamarca &mdash; Extension Chia &mdash; 2026</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const obs = new IntersectionObserver(entries => {
+            entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+        }, {threshold:0.1});
+        document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+    </script>
+</body>
+</html>
